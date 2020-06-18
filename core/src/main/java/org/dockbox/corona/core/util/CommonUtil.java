@@ -1,5 +1,6 @@
 package org.dockbox.corona.core.util;
 
+import java.sql.Date;
 import java.sql.Time;
 import java.time.Instant;
 
@@ -13,4 +14,7 @@ public class CommonUtil {
         return Time.valueOf(time);
     }
 
+    public static String parseDateString(Date date) {
+        return "";
+    }
 }
