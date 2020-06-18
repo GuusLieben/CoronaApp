@@ -91,4 +91,35 @@ public class PacketSecurityUtil {
             return PacketSecurityUtil.INVALID;
         }
     }
+    public static PrivateKey storePubAndGetKey(File out) {
+        Optional<KeyPair> optionalKeyPair = generateKeyPair();
+        if (optionalKeyPair.isPresent()) {
+            KeyPair keyPair = optionalKeyPair.get();
+            try {
+                OutputStream stream;
+                stream = new FileOutputStream(out);
+                byte[] encoded = keyPair.getPublic().getEncoded();
+                System.out.println("Encoded before store : " + Arrays.toString(encoded));
+                stream.write(encoded);
+                stream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return keyPair.getPrivate();
+        }
+        return null;
+    }
+
+    public static PublicKey getPublicKeyFromFile(File file) {
+        Path path = Paths.get(file.toURI());
+        try {
+            byte[] bytes = Files.readAllBytes(path);
+            X509EncodedKeySpec ks = new X509EncodedKeySpec(bytes);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            return kf.generatePublic(ks);
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
