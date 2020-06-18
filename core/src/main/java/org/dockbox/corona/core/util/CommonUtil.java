@@ -17,4 +17,8 @@ public class CommonUtil {
     public static String parseDateString(Date date) {
         return "";
     }
+
+    public static Date parseDate(String date) {
+        return Date.valueOf(date);
+    }
 }
