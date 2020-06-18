@@ -6,27 +6,29 @@ import java.sql.Time;
 
 public class SendInfectConfPacket extends Packet {
 
-    private final String id;
-    private final Time contactSent;
+    public final static SendInfectConfPacket EMPTY = new SendInfectConfPacket(null, null);
 
-    public SendInfectConfPacket(String id, Time contactSent) {
+    private final String id;
+    private final Time sent;
+
+    public SendInfectConfPacket(String id, Time sent) {
         this.id = id;
-        this.contactSent = contactSent;
+        this.sent = sent;
     }
 
     public String getId() {
         return id;
     }
 
-    public Time getContactSent() {
-        return contactSent;
+    public Time getSent() {
+        return sent;
     }
 
     @Override
     public String serialize() {
         return new StringBuilder()
                 .append("ID=").append(this.getId())
-                .append("\nTIMESTAMP_CONTACT_SENT=").append(CommonUtil.parseTimeString(this.getContactSent()))
+                .append("\nTIMESTAMP_SENT=").append(CommonUtil.parseTimeString(this.getSent()))
                 .toString();
     }
 
@@ -43,7 +45,7 @@ public class SendInfectConfPacket extends Packet {
                 case "ID":
                     builder.withId(value);
                     break;
-                case "TIMESTAMP_CONTACT_SENT":
+                case "TIMESTAMP_SENT":
                     builder.withContactSent(CommonUtil.parseTime(value));
                     break;
                 default:
@@ -56,20 +58,20 @@ public class SendInfectConfPacket extends Packet {
 
     public static final class Builder {
         private String id;
-        private Time contactSent;
+        private Time sent;
 
         public Builder withId(String id) {
             this.id = id;
             return this;
         }
 
-        public Builder withContactSent(Time contactSent) {
-            this.contactSent = contactSent;
+        public Builder withContactSent(Time sent) {
+            this.sent = sent;
             return this;
         }
 
         public SendInfectConfPacket build() {
-            return new SendInfectConfPacket(id, contactSent);
+            return new SendInfectConfPacket(id, sent);
         }
     }
 }
