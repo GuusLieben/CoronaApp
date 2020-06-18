@@ -3,6 +3,7 @@ package org.dockbox.corona.core.packets;
 import org.dockbox.corona.core.util.CommonUtil;
 
 import java.sql.Time;
+import java.util.Arrays;
 
 public class ConfirmPacket<P extends Packet> extends Packet {
 
@@ -27,9 +28,23 @@ public class ConfirmPacket<P extends Packet> extends Packet {
                 .toString();
     }
 
+    @SuppressWarnings("unchecked")
+    public ConfirmPacket<P> deserialize(String message, P empty) {
+        String[] lines = message.split("\n");
+        Builder<P> builder = new Builder<P>();
+
+        String confirmedStamp = lines[lines.length-1];
+        builder.withConfirmed(CommonUtil.parseTime(confirmedStamp.split("=")[1]));
+
+        String[] child = Arrays.stream(lines).filter(line -> !line.startsWith("TIMESTAMP_CONFIRMED")).toArray(String[]::new);
+        builder.withPacket((P) empty.deserialize(String.join("\n", child)));
+
+        return builder.build();
+    }
+
     @Override
-    public Packet deserialize(String message) {
-        return null;
+    public ConfirmPacket<P> deserialize(String message) {
+        throw new UnsupportedOperationException("Cannot deserialize confirm packet without empty child");
     }
 
 
