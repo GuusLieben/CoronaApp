@@ -7,6 +7,8 @@ import java.sql.Time;
 
 public class SendUserDataPacket extends Packet {
 
+    public static final SendUserDataPacket EMPTY = new SendUserDataPacket(null, null);
+
     private final User user;
     private final Time received;
 

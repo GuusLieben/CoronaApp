@@ -6,6 +6,8 @@ import java.sql.Time;
 
 public class RequestUserDataPacket extends Packet {
 
+    public static final RequestUserDataPacket EMPTY = new RequestUserDataPacket(null, null);
+
     private final String id;
     private final Time timestamp;
 
