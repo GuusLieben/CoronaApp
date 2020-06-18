@@ -25,6 +25,9 @@ import java.util.Optional;
 public class PacketSecurityUtil {
 
     public static final String INVALID = "$InvalidatedContent";
+    public static final String HASH_ALGORITHM = "SHA-512";
+    public static final String KEY_ALGORITHM = "RSA";
+    public static final String CIPHER_ALGORITHM = "RSA/ECB/PKCS1Padding";
 
     public static String getHash(String unencryptedPacket) {
         String[] packetLines = unencryptedPacket.split("\n");
@@ -45,7 +48,7 @@ public class PacketSecurityUtil {
 
     public static String generateHash(String content) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-512");
+            MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM);
             byte[] messageDigest = md.digest(content.getBytes(StandardCharsets.UTF_8));
 
             BigInteger no = new BigInteger(1, messageDigest);
@@ -69,7 +72,7 @@ public class PacketSecurityUtil {
 
     public static Optional<KeyPair> generateKeyPair() {
         try {
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance(KEY_ALGORITHM);
             kpg.initialize(2048);
             return Optional.ofNullable(kpg.generateKeyPair());
         } catch (NoSuchAlgorithmException e) {
@@ -89,7 +92,7 @@ public class PacketSecurityUtil {
 
     public static byte[] encrypt(String content, PrivateKey privKey) {
         try {
-            Cipher encrypt = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            Cipher encrypt = Cipher.getInstance(CIPHER_ALGORITHM);
             encrypt.init(Cipher.ENCRYPT_MODE, privKey);
             return encrypt.doFinal(toByteArray(content));
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException e) {
@@ -99,7 +102,7 @@ public class PacketSecurityUtil {
 
     public static String decrypt(byte[] encrypted, PublicKey pubKey) {
         try {
-            Cipher decrypt = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            Cipher decrypt = Cipher.getInstance(CIPHER_ALGORITHM);
             decrypt.init(Cipher.DECRYPT_MODE, pubKey);
             return toString(decrypt.doFinal(encrypted));
         } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException e) {
@@ -153,7 +156,7 @@ public class PacketSecurityUtil {
         try {
             byte[] bytes = Files.readAllBytes(path);
             X509EncodedKeySpec ks = new X509EncodedKeySpec(bytes);
-            KeyFactory kf = KeyFactory.getInstance("RSA");
+            KeyFactory kf = KeyFactory.getInstance(KEY_ALGORITHM);
             return kf.generatePublic(ks);
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace();
