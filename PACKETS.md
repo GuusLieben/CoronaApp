@@ -96,7 +96,7 @@ SEND::ALERT
 {
     ID=[id]
     TIMESTAMP=[timestamp]
-    CONTACT_TIMESTAMP=[timestamp]
+    TIMESTAMP_CONTACT=[timestamp]
 }
 ```
 **Received**
@@ -105,6 +105,7 @@ CONFIRM::ALERT
 {
     ID=[id]
     TIMESTAMP=[timestamp]
-    CONTACT_TIMESTAMP=[timestamp]
+    TIMESTAMP_CONTACT=[timestamp]
+    TIMESTAMP_CONFIRMED=[timestamp]
 }
 ```
