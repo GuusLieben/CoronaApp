@@ -5,7 +5,7 @@ plugins {
 
 allprojects {
 
-    group = "org.gradle.kotlin.dsl.samples.multiproject"
+    group = "org.dockbox.corona"
 
     version = "1.0"
 
