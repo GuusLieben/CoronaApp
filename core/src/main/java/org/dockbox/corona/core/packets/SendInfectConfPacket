@@ -9,26 +9,26 @@ public class SendInfectConfPacket extends Packet {
     public final static SendInfectConfPacket EMPTY = new SendInfectConfPacket(null, null);
 
     private final String id;
-    private final Time sent;
+    private final Time infected;
 
-    public SendInfectConfPacket(String id, Time sent) {
+    public SendInfectConfPacket(String id, Time infected) {
         this.id = id;
-        this.sent = sent;
+        this.infected = infected;
     }
 
     public String getId() {
         return id;
     }
 
-    public Time getSent() {
-        return sent;
+    public Time getInfected() {
+        return infected;
     }
 
     @Override
     public String serialize() {
         return new StringBuilder()
                 .append("ID=").append(this.getId())
-                .append("\nTIMESTAMP_SENT=").append(CommonUtil.parseTimeString(this.getSent()))
+                .append("\nTIMESTAMP_INFECTED=").append(CommonUtil.parseTimeString(this.getInfected()))
                 .toString();
     }
 
@@ -45,7 +45,7 @@ public class SendInfectConfPacket extends Packet {
                 case "ID":
                     builder.withId(value);
                     break;
-                case "TIMESTAMP_SENT":
+                case "TIMESTAMP_INFECTED":
                     builder.withContactSent(CommonUtil.parseTime(value));
                     break;
                 default:
@@ -58,20 +58,20 @@ public class SendInfectConfPacket extends Packet {
 
     public static final class Builder {
         private String id;
-        private Time sent;
+        private Time infected;
 
         public Builder withId(String id) {
             this.id = id;
             return this;
         }
 
-        public Builder withContactSent(Time sent) {
-            this.sent = sent;
+        public Builder withContactSent(Time infected) {
+            this.infected = infected;
             return this;
         }
 
         public SendInfectConfPacket build() {
-            return new SendInfectConfPacket(id, sent);
+            return new SendInfectConfPacket(id, infected);
         }
     }
 }
