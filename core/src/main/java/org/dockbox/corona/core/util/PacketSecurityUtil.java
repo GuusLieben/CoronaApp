@@ -58,6 +58,15 @@ public class PacketSecurityUtil {
             throw new RuntimeException(e);
         }
     }
+
+    private static String toString(byte[] bytes) {
+        return new String(bytes, StandardCharsets.UTF_8);
+    }
+
+    private static byte[] toByteArray(String string) {
+        return string.getBytes(StandardCharsets.UTF_8);
+    }
+
     public static Optional<KeyPair> generateKeyPair() {
         try {
             KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
@@ -68,9 +77,16 @@ public class PacketSecurityUtil {
         }
         return Optional.empty();
     }
+
+    public static String convertToBase64(Key key) {
+        Base64.Encoder encoder = Base64.getEncoder();
+        return encoder.encodeToString(key.getEncoded());
+    }
+
     public static boolean isUnmodified(String content, String hash) {
         return generateHash(content).equals(hash);
     }
+
     public static byte[] encrypt(String content, PrivateKey privKey) {
         try {
             Cipher encrypt = Cipher.getInstance("RSA/ECB/PKCS1Padding");
@@ -91,6 +107,28 @@ public class PacketSecurityUtil {
             return PacketSecurityUtil.INVALID;
         }
     }
+
+    public static String encryptPacket(Packet p, PrivateKey privateKey) {
+        String header = p.getHeader();
+        String unencryptedContent = p.serialize();
+        byte[] encryptedHeaderAndContent = encrypt(header + "\n" + unencryptedContent, privateKey);
+
+        return new StringBuilder()
+                .append(toString(encryptedHeaderAndContent)).append("\n")
+                .append("HASH::").append(generateHash(unencryptedContent))
+                .toString();
+    }
+
+    // TODO : Make this work
+    public static String decryptPacket(String encryptedPacket, PublicKey publicKey) {
+        String[] packetParts = encryptedPacket.split("\n");
+        String[] encryptedPacketParts = Arrays.copyOfRange(packetParts, 0, packetParts.length - 1);
+        String hashLine = packetParts[packetParts.length - 1];
+        String encryptedPacketPart = String.join("\n", encryptedPacketParts);
+        String decryptedPacketPart = decrypt(toByteArray(encryptedPacketPart), publicKey);
+        return decryptedPacketPart + "\n" + hashLine;
+    }
+
     public static PrivateKey storePubAndGetKey(File out) {
         Optional<KeyPair> optionalKeyPair = generateKeyPair();
         if (optionalKeyPair.isPresent()) {
