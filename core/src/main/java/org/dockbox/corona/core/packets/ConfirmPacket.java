@@ -22,9 +22,17 @@ public class ConfirmPacket<P extends Packet> extends Packet {
 
     @Override
     public String serialize() {
-        return new StringBuilder()
+        String packetSer = new StringBuilder()
                 .append(packet.serialize())
-                // TODO : Filter out old timestamps
+                .toString();
+
+        packetSer = String.join("\n",
+                Arrays.stream(packetSer.split("\n"))
+                        .filter(line -> !line.startsWith("TIMESTAMP_CONTACT") && line.startsWith("TIMESTAMP"))
+                        .toArray(String[]::new));
+
+        return new StringBuilder()
+                .append(packetSer)
                 .append("\nTIMESTAMP_CONFIRMED=").append(CommonUtil.parseTimeString(confirmed))
                 .toString();
     }
