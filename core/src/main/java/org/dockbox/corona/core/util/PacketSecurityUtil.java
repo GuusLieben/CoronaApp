@@ -121,7 +121,7 @@ public class PacketSecurityUtil {
                 .append("HASH::").append(generateHash(unencryptedContent))
                 .toString();
     }
-    
+
     public static String decryptPacket(String encryptedPacket, PublicKey publicKey) {
         String[] packetParts = encryptedPacket.split("\n");
         String[] encryptedPacketParts = Arrays.copyOfRange(packetParts, 0, packetParts.length - 1);

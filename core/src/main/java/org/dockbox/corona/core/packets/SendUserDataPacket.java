@@ -3,16 +3,16 @@ package org.dockbox.corona.core.packets;
 import org.dockbox.corona.core.model.User;
 import org.dockbox.corona.core.util.CommonUtil;
 
-import java.sql.Time;
+import java.util.Date;
 
 public class SendUserDataPacket extends Packet {
 
     public static final SendUserDataPacket EMPTY = new SendUserDataPacket(null, null);
 
     private final User user;
-    private final Time received;
+    private final Date received;
 
-    public SendUserDataPacket(User user, Time received) {
+    public SendUserDataPacket(User user, Date received) {
         this.user = user;
         this.received = received;
     }
@@ -35,7 +35,7 @@ public class SendUserDataPacket extends Packet {
                 .append("\nLASTNAME=").append(user.getLastName())
                 .append("\nBSN=").append(user.getBSN())
                 .append("\nBIRTHDATE=").append(CommonUtil.parseDateString(user.getBirthDate()))
-                .append("\nTIMESTAMP_RECEIVED=").append(CommonUtil.parseTimeString(received))
+                .append("\nTIMESTAMP_RECEIVED=").append(CommonUtil.parseDateString(received))
                 .toString();
     }
 
@@ -66,7 +66,7 @@ public class SendUserDataPacket extends Packet {
                     userBuilder.withBirthDate(CommonUtil.parseDate(value));
                     break;
                 case "TIMESTAMP_RECEIVED":
-                    builder.withReceived(CommonUtil.parseTime(value));
+                    builder.withReceived(CommonUtil.parseDate(value));
                     break;
             }
         }
@@ -76,7 +76,7 @@ public class SendUserDataPacket extends Packet {
 
     public static final class Builder {
         private User user;
-        private Time received;
+        private Date received;
 
         public Builder() {
         }
@@ -86,7 +86,7 @@ public class SendUserDataPacket extends Packet {
             return this;
         }
 
-        public Builder withReceived(Time val) {
+        public Builder withReceived(Date val) {
             received = val;
             return this;
         }

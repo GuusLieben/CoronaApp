@@ -2,15 +2,15 @@ package org.dockbox.corona.core.packets;
 
 import org.dockbox.corona.core.util.CommonUtil;
 
-import java.sql.Time;
+import java.util.Date;
 import java.util.Arrays;
 
 public class ConfirmPacket<P extends Packet> extends Packet {
 
     private final P packet;
-    private final Time confirmed;
+    private final Date confirmed;
 
-    public ConfirmPacket(P packet, Time confirmed) {
+    public ConfirmPacket(P packet, Date confirmed) {
         this.packet = packet;
         this.confirmed = confirmed;
     }
@@ -38,7 +38,7 @@ public class ConfirmPacket<P extends Packet> extends Packet {
 
         return new StringBuilder()
                 .append(packetSer)
-                .append("\nTIMESTAMP_CONFIRMED=").append(CommonUtil.parseTimeString(confirmed))
+                .append("\nTIMESTAMP_CONFIRMED=").append(CommonUtil.parseDateString(confirmed))
                 .toString();
     }
 
@@ -48,7 +48,7 @@ public class ConfirmPacket<P extends Packet> extends Packet {
         Builder<P> builder = new Builder<P>();
 
         String confirmedStamp = lines[lines.length-1];
-        builder.withConfirmed(CommonUtil.parseTime(confirmedStamp.split("=")[1]));
+        builder.withConfirmed(CommonUtil.parseDate(confirmedStamp.split("=")[1]));
 
         String[] child = Arrays.stream(lines).filter(line -> !line.startsWith("TIMESTAMP_CONFIRMED")).toArray(String[]::new);
         builder.withPacket((P) empty.deserialize(String.join("\n", child)));
@@ -64,7 +64,7 @@ public class ConfirmPacket<P extends Packet> extends Packet {
 
     public static final class Builder<P extends Packet> {
         private P packet;
-        private Time confirmed;
+        private Date confirmed;
 
         public Builder() {
         }
@@ -74,7 +74,7 @@ public class ConfirmPacket<P extends Packet> extends Packet {
             return this;
         }
 
-        public Builder<P> withConfirmed(Time val) {
+        public Builder<P> withConfirmed(Date val) {
             confirmed = val;
             return this;
         }

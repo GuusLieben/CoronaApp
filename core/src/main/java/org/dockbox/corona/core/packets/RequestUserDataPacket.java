@@ -2,16 +2,16 @@ package org.dockbox.corona.core.packets;
 
 import org.dockbox.corona.core.util.CommonUtil;
 
-import java.sql.Time;
+import java.util.Date;
 
 public class RequestUserDataPacket extends Packet {
 
     public static final RequestUserDataPacket EMPTY = new RequestUserDataPacket(null, null);
 
     private final String id;
-    private final Time timestamp;
+    private final Date timestamp;
 
-    public RequestUserDataPacket(String id, Time timestamp) {
+    public RequestUserDataPacket(String id, Date timestamp) {
         this.id = id;
         this.timestamp = timestamp;
     }
@@ -25,7 +25,7 @@ public class RequestUserDataPacket extends Packet {
         return id;
     }
 
-    public Time getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
 
@@ -38,7 +38,7 @@ public class RequestUserDataPacket extends Packet {
     public String serialize() {
         return new StringBuilder()
                 .append("ID=").append(id)
-                .append("\nTIMESTAMP_REQUEST=").append(CommonUtil.parseTimeString(timestamp))
+                .append("\nTIMESTAMP_REQUEST=").append(CommonUtil.parseDateString(timestamp))
                 .toString();
     }
 
@@ -56,7 +56,7 @@ public class RequestUserDataPacket extends Packet {
                     builder.withId(value);
                     break;
                 case "TIMESTAMP_REQUEST":
-                    builder.withTimestamp(CommonUtil.parseTime(value));
+                    builder.withTimestamp(CommonUtil.parseDate(value));
                     break;
                 default:
                     throw new IllegalArgumentException("Incorrect packet format");
@@ -67,7 +67,7 @@ public class RequestUserDataPacket extends Packet {
 
     public static final class Builder {
         private String id;
-        private Time timestamp;
+        private Date timestamp;
 
         public Builder() {
         }
@@ -77,7 +77,7 @@ public class RequestUserDataPacket extends Packet {
             return this;
         }
 
-        public Builder withTimestamp(Time val) {
+        public Builder withTimestamp(Date val) {
             timestamp = val;
             return this;
         }

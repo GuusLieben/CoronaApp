@@ -2,16 +2,16 @@ package org.dockbox.corona.core.packets;
 
 import org.dockbox.corona.core.util.CommonUtil;
 
-import java.sql.Time;
+import java.util.Date;
 
 public class SendInfectConfPacket extends Packet {
 
     public final static SendInfectConfPacket EMPTY = new SendInfectConfPacket(null, null);
 
     private final String id;
-    private final Time infected;
+    private final Date infected;
 
-    public SendInfectConfPacket(String id, Time infected) {
+    public SendInfectConfPacket(String id, Date infected) {
         this.id = id;
         this.infected = infected;
     }
@@ -20,7 +20,7 @@ public class SendInfectConfPacket extends Packet {
         return id;
     }
 
-    public Time getInfected() {
+    public Date getInfected() {
         return infected;
     }
 
@@ -33,7 +33,7 @@ public class SendInfectConfPacket extends Packet {
     public String serialize() {
         return new StringBuilder()
                 .append("ID=").append(this.getId())
-                .append("\nTIMESTAMP_INFECTED=").append(CommonUtil.parseTimeString(this.getInfected()))
+                .append("\nTIMESTAMP_INFECTED=").append(CommonUtil.parseDateString(this.getInfected()))
                 .toString();
     }
 
@@ -51,7 +51,7 @@ public class SendInfectConfPacket extends Packet {
                     builder.withId(value);
                     break;
                 case "TIMESTAMP_INFECTED":
-                    builder.withContactSent(CommonUtil.parseTime(value));
+                    builder.withContactSent(CommonUtil.parseDate(value));
                     break;
                 default:
                     throw new IllegalArgumentException("Incorrect packet format");
@@ -63,14 +63,14 @@ public class SendInfectConfPacket extends Packet {
 
     public static final class Builder {
         private String id;
-        private Time infected;
+        private Date infected;
 
         public Builder withId(String id) {
             this.id = id;
             return this;
         }
 
-        public Builder withContactSent(Time infected) {
+        public Builder withContactSent(Date infected) {
             this.infected = infected;
             return this;
         }
