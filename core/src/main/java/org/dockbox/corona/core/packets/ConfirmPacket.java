@@ -23,7 +23,7 @@ public class ConfirmPacket<P extends Packet> extends Packet {
     public String serialize() {
         return new StringBuilder()
                 .append(packet.serialize())
-                .append("TIMESTAMP_CONFIRMED=").append(CommonUtil.parseTimeString(confirmed))
+                .append("\nTIMESTAMP_CONFIRMED=").append(CommonUtil.parseTimeString(confirmed))
                 .toString();
     }
 
