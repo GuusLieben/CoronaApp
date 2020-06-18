@@ -37,6 +37,11 @@ public class SendContactConfPacket extends Packet {
     }
 
     @Override
+    public String getHeader() {
+        return "SEND::CONTACT_CONF";
+    }
+
+    @Override
     public String serialize() {
         return new StringBuilder()
                 .append("ID=").append(this.getId())

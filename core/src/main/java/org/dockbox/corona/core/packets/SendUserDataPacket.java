@@ -23,6 +23,11 @@ public class SendUserDataPacket extends Packet {
     }
 
     @Override
+    public String getHeader() {
+        return "SEND::USER_DATA";
+    }
+
+    @Override
     public String serialize() {
         return new StringBuilder()
                 .append("ID=").append(user.getId())

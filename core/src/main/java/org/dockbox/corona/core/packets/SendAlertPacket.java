@@ -32,6 +32,11 @@ public class SendAlertPacket extends Packet {
 
 
     @Override
+    public String getHeader() {
+        return "SEND::ALERT";
+    }
+
+    @Override
     public String serialize() {
         return new StringBuilder()
                 .append("ID=").append(this.getId())

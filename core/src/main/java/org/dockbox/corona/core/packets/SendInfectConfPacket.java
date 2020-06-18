@@ -25,6 +25,11 @@ public class SendInfectConfPacket extends Packet {
     }
 
     @Override
+    public String getHeader() {
+        return "SEND::INFECT_CONF";
+    }
+
+    @Override
     public String serialize() {
         return new StringBuilder()
                 .append("ID=").append(this.getId())

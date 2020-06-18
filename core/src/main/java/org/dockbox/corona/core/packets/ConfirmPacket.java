@@ -21,6 +21,11 @@ public class ConfirmPacket<P extends Packet> extends Packet {
     }
 
     @Override
+    public String getHeader() {
+        return packet.getHeader().split("::")[1];
+    }
+
+    @Override
     public String serialize() {
         String packetSer = new StringBuilder()
                 .append(packet.serialize())
