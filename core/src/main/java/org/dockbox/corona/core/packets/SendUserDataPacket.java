@@ -10,7 +10,7 @@ public class SendUserDataPacket extends Packet {
     private final User user;
     private final Time received;
 
-    public SendUserDataPacket(User user, Time received, Time sent) {
+    public SendUserDataPacket(User user, Time received) {
         this.user = user;
         this.received = received;
     }
@@ -34,13 +34,42 @@ public class SendUserDataPacket extends Packet {
 
     @Override
     public Packet deserialize(String message) {
-        return null;
+        String[] lines = message.split("\n");
+        Builder builder = new Builder();
+        User.Builder userBuilder = new User.Builder();
+        for (String line : lines) {
+            String[] keyValue = line.split("=");
+            String key = keyValue[0];
+            String value = keyValue[1];
+
+            switch (key) {
+                case "ID":
+                    userBuilder.withId(value);
+                    break;
+                case "FIRSTNAME":
+                    userBuilder.withFirstName(value);
+                    break;
+                case "LASTNAME":
+                    userBuilder.withLastName(value);
+                    break;
+                case "BSN":
+                    userBuilder.withBSN(value);
+                    break;
+                case "BIRTHDATE":
+                    userBuilder.withBirthDate(CommonUtil.parseDate(value));
+                    break;
+                case "TIMESTAMP_RECEIVED":
+                    builder.withReceived(CommonUtil.parseTime(value));
+                    break;
+            }
+        }
+        builder.withUser(userBuilder.build());
+        return builder.build();
     }
 
     public static final class Builder {
         private User user;
         private Time received;
-        private Time sent;
 
         public Builder() {
         }
@@ -52,11 +81,6 @@ public class SendUserDataPacket extends Packet {
 
         public Builder withReceived(Time val) {
             received = val;
-            return this;
-        }
-
-        public Builder withSent(Time val) {
-            sent = val;
             return this;
         }
 
