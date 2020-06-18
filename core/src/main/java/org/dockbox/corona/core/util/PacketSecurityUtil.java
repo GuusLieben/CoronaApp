@@ -71,4 +71,24 @@ public class PacketSecurityUtil {
     public static boolean isUnmodified(String content, String hash) {
         return generateHash(content).equals(hash);
     }
+    public static byte[] encrypt(String content, PrivateKey privKey) {
+        try {
+            Cipher encrypt = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            encrypt.init(Cipher.ENCRYPT_MODE, privKey);
+            return encrypt.doFinal(toByteArray(content));
+        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException e) {
+            return new byte[0];
+        }
+    }
+
+    public static String decrypt(byte[] encrypted, PublicKey pubKey) {
+        try {
+            Cipher decrypt = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            decrypt.init(Cipher.DECRYPT_MODE, pubKey);
+            return toString(decrypt.doFinal(encrypted));
+        } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException e) {
+            e.printStackTrace();
+            return PacketSecurityUtil.INVALID;
+        }
+    }
 }
