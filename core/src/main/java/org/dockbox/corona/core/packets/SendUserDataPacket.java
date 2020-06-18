@@ -13,13 +13,11 @@ public class SendUserDataPacket extends Packet {
     public SendUserDataPacket(User user, Time received, Time sent) {
         this.user = user;
         this.received = received;
-        this.sent = sent;
     }
 
     private SendUserDataPacket(Builder builder) {
         user = builder.user;
         received = builder.received;
-        sent = builder.sent;
     }
 
     @Override
@@ -30,7 +28,8 @@ public class SendUserDataPacket extends Packet {
                 .append("\nLASTNAME=").append(user.getLastName())
                 .append("\nBSN=").append(user.getBSN())
                 .append("\nBIRTHDATE=").append(CommonUtil.parseDateString(user.getBirthDate()))
-                .append("\nRECEIVED=").append();
+                .append("\nRECEIVED=").append(CommonUtil.parseTimeString(received))
+                .toString();
     }
 
     @Override
