@@ -38,7 +38,7 @@ CONFIRM::CONTACT_CONF
 SEND::INFECT_CONF
 {
     ID=[id]
-    TIMESTAMP=[timestamp]
+    TIMESTAMP_SENT=[timestamp]
 }
 ```
 **Received**

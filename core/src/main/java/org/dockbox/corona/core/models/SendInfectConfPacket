@@ -1,0 +1,41 @@
+package org.dockbox.corona.core.models;
+
+import java.sql.Time;
+
+public class SendInfectConfPacket extends Packet {
+
+    private final String id;
+    private final Time contactSent;
+
+    public SendInfectConfPacket(String id, Time contactSent) {
+        this.id = id;
+        this.contactSent = contactSent;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Time getContactSent() {
+        return contactSent;
+    }
+
+    public static final class Builder {
+        private String id;
+        private Time contactSent;
+
+        public Builder withId(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withContactSent(Time contactSent) {
+            this.contactSent = contactSent;
+            return this;
+        }
+
+        public Builder build() {
+            return new SendContactConfPacket(id, contactSent);
+        }
+    }
+}
