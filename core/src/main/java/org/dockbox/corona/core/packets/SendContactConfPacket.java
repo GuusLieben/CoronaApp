@@ -2,7 +2,7 @@ package org.dockbox.corona.core.packets;
 
 import org.dockbox.corona.core.util.CommonUtil;
 
-import java.sql.Time;
+import java.util.Date;
 
 public class SendContactConfPacket extends Packet {
 
@@ -10,10 +10,10 @@ public class SendContactConfPacket extends Packet {
 
     private final String id;
     private final String contactId;
-    private final Time contactSent;
-    private final Time contactReceived;
+    private final Date contactSent;
+    private final Date contactReceived;
 
-    public SendContactConfPacket(String id, String contactId, Time contactSent, Time contactReceived) {
+    public SendContactConfPacket(String id, String contactId, Date contactSent, Date contactReceived) {
         this.id = id;
         this.contactId = contactId;
         this.contactSent = contactSent;
@@ -28,12 +28,17 @@ public class SendContactConfPacket extends Packet {
         return contactId;
     }
 
-    public Time getContactSent() {
+    public Date getContactSent() {
         return contactSent;
     }
 
-    public Time getContactReceived() {
+    public Date getContactReceived() {
         return contactReceived;
+    }
+
+    @Override
+    public String getHeader() {
+        return "SEND::CONTACT_CONF";
     }
 
     @Override
@@ -41,8 +46,8 @@ public class SendContactConfPacket extends Packet {
         return new StringBuilder()
                 .append("ID=").append(this.getId())
                 .append("\nCONTACT_ID=").append(this.getContactId())
-                .append("\nTIMESTAMP_CONTACT_SENT=").append(CommonUtil.parseTimeString(this.getContactSent()))
-                .append("\nTIMESTAMP_CONTACT_CONFIRMED=").append(CommonUtil.parseTimeString(this.getContactReceived()))
+                .append("\nTIMESTAMP_CONTACT_SENT=").append(CommonUtil.parseDateString(this.getContactSent()))
+                .append("\nTIMESTAMP_CONTACT_CONFIRMED=").append(CommonUtil.parseDateString(this.getContactReceived()))
                 .toString();
     }
 
@@ -63,10 +68,10 @@ public class SendContactConfPacket extends Packet {
                     builder.withContactId(value);
                     break;
                 case "TIMESTAMP_CONTACT_SENT":
-                    builder.withContactSent(CommonUtil.parseTime(value));
+                    builder.withContactSent(CommonUtil.parseDate(value));
                     break;
                 case "TIMESTAMP_CONTACT_CONFIRMED":
-                    builder.withContactReceived(CommonUtil.parseTime(value));
+                    builder.withContactReceived(CommonUtil.parseDate(value));
                     break;
                 default:
                     throw new IllegalArgumentException("Incorrect packet format");
@@ -79,8 +84,8 @@ public class SendContactConfPacket extends Packet {
     private static final class Builder {
         private String id;
         private String contactId;
-        private Time contactSent;
-        private Time contactReceived;
+        private Date contactSent;
+        private Date contactReceived;
 
         public Builder withId(String id) {
             this.id = id;
@@ -92,12 +97,12 @@ public class SendContactConfPacket extends Packet {
             return this;
         }
 
-        public Builder withContactSent(Time contactSent) {
+        public Builder withContactSent(Date contactSent) {
             this.contactSent = contactSent;
             return this;
         }
 
-        public Builder withContactReceived(Time contactReceived) {
+        public Builder withContactReceived(Date contactReceived) {
             this.contactReceived = contactReceived;
             return this;
         }

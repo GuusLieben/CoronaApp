@@ -2,17 +2,17 @@ package org.dockbox.corona.core.packets;
 
 import org.dockbox.corona.core.util.CommonUtil;
 
-import java.sql.Time;
+import java.util.Date;
 
 public class SendAlertPacket extends Packet {
 
     public static final SendAlertPacket EMPTY = new SendAlertPacket(null, null, null);
 
     private final String id;
-    private final Time alerted;
-    private final Time contactInfected;
+    private final Date alerted;
+    private final Date contactInfected;
 
-    public SendAlertPacket(String id, Time alerted, Time contactInfected) {
+    public SendAlertPacket(String id, Date alerted, Date contactInfected) {
         this.id = id;
         this.alerted = alerted;
         this.contactInfected = contactInfected;
@@ -22,21 +22,26 @@ public class SendAlertPacket extends Packet {
         return id;
     }
 
-    public Time getAlerted() {
+    public Date getAlerted() {
         return alerted;
     }
 
-    public Time getContactInfected() {
+    public Date getContactInfected() {
         return contactInfected;
     }
 
 
     @Override
+    public String getHeader() {
+        return "SEND::ALERT";
+    }
+
+    @Override
     public String serialize() {
         return new StringBuilder()
                 .append("ID=").append(this.getId())
-                .append("\nTIMESTAMP_ALERTED=").append(CommonUtil.parseTimeString(this.getAlerted()))
-                .append("\nCONTACT_TIMESTAMP=").append(CommonUtil.parseTimeString(this.getContactInfected()))
+                .append("\nTIMESTAMP_ALERTED=").append(CommonUtil.parseDateString(this.getAlerted()))
+                .append("\nCONTACT_TIMESTAMP=").append(CommonUtil.parseDateString(this.getContactInfected()))
                 .toString();
     }
 
@@ -54,10 +59,10 @@ public class SendAlertPacket extends Packet {
                     builder.withId(value);
                     break;
                 case "TIMESTAMP_ALERTED":
-                    builder.withSent(CommonUtil.parseTime(value));
+                    builder.withSent(CommonUtil.parseDate(value));
                     break;
                 case "CONTACT_TIMESTAMP":
-                    builder.withContactInfected(CommonUtil.parseTime(value));
+                    builder.withContactInfected(CommonUtil.parseDate(value));
                     break;
                 default:
                     throw new IllegalArgumentException("Incorrect packet format");
@@ -69,20 +74,20 @@ public class SendAlertPacket extends Packet {
 
     private static final class Builder {
         private String id;
-        private Time alerted;
-        private Time contactInfected;
+        private Date alerted;
+        private Date contactInfected;
 
         public SendAlertPacket.Builder withId(String id) {
             this.id = id;
             return this;
         }
 
-        public SendAlertPacket.Builder withSent(Time alerted) {
+        public SendAlertPacket.Builder withSent(Date alerted) {
             this.alerted = alerted;
             return this;
         }
 
-        public SendAlertPacket.Builder withContactInfected(Time contactReceived) {
+        public SendAlertPacket.Builder withContactInfected(Date contactReceived) {
             this.contactInfected = contactReceived;
             return this;
         }
