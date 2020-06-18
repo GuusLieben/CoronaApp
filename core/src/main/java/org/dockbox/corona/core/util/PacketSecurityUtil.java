@@ -63,11 +63,11 @@ public class PacketSecurityUtil {
     }
 
     private static String toString(byte[] bytes) {
-        return new String(bytes, StandardCharsets.UTF_8);
+        return new String(bytes, StandardCharsets.ISO_8859_1);
     }
 
     private static byte[] toByteArray(String string) {
-        return string.getBytes(StandardCharsets.UTF_8);
+        return string.getBytes(StandardCharsets.ISO_8859_1);
     }
 
     public static Optional<KeyPair> generateKeyPair() {
@@ -121,8 +121,7 @@ public class PacketSecurityUtil {
                 .append("HASH::").append(generateHash(unencryptedContent))
                 .toString();
     }
-
-    // TODO : Make this work
+    
     public static String decryptPacket(String encryptedPacket, PublicKey publicKey) {
         String[] packetParts = encryptedPacket.split("\n");
         String[] encryptedPacketParts = Arrays.copyOfRange(packetParts, 0, packetParts.length - 1);
