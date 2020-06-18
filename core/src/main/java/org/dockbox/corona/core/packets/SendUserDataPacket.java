@@ -28,7 +28,7 @@ public class SendUserDataPacket extends Packet {
                 .append("\nLASTNAME=").append(user.getLastName())
                 .append("\nBSN=").append(user.getBSN())
                 .append("\nBIRTHDATE=").append(CommonUtil.parseDateString(user.getBirthDate()))
-                .append("\nRECEIVED=").append(CommonUtil.parseTimeString(received))
+                .append("\nTIMESTAMP_RECEIVED=").append(CommonUtil.parseTimeString(received))
                 .toString();
     }
 

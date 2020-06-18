@@ -31,7 +31,7 @@ public class RequestUserDataPacket extends Packet {
     public String serialize() {
         return new StringBuilder()
                 .append("ID=").append(id)
-                .append("\nTIMESTAMP=").append(CommonUtil.parseTimeString(timestamp))
+                .append("\nTIMESTAMP_REQUEST=").append(CommonUtil.parseTimeString(timestamp))
                 .toString();
     }
 
@@ -48,7 +48,7 @@ public class RequestUserDataPacket extends Packet {
                 case "ID":
                     builder.withId(value);
                     break;
-                case "TIMESTAMP":
+                case "TIMESTAMP_REQUEST":
                     builder.withTimestamp(CommonUtil.parseTime(value));
                     break;
                 default:
