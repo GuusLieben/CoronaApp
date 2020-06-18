@@ -58,6 +58,16 @@ public class PacketSecurityUtil {
             throw new RuntimeException(e);
         }
     }
+    public static Optional<KeyPair> generateKeyPair() {
+        try {
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+            kpg.initialize(2048);
+            return Optional.ofNullable(kpg.generateKeyPair());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
     public static boolean isUnmodified(String content, String hash) {
         return generateHash(content).equals(hash);
     }
