@@ -34,8 +34,8 @@ public class SendInfectConfPacket extends Packet {
             return this;
         }
 
-        public Builder build() {
-            return new SendContactConfPacket(id, contactSent);
+        public SendInfectConfPacket build() {
+            return new SendInfectConfPacket(id, contactSent);
         }
     }
 }
