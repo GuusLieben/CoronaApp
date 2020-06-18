@@ -58,4 +58,7 @@ public class PacketSecurityUtil {
             throw new RuntimeException(e);
         }
     }
+    public static boolean isUnmodified(String content, String hash) {
+        return generateHash(content).equals(hash);
+    }
 }
