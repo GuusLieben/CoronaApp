@@ -6,6 +6,8 @@ import java.sql.Time;
 
 public class SendContactConfPacket extends Packet {
 
+    public static final SendContactConfPacket EMPTY = new SendContactConfPacket(null, null, null, null);
+
     private final String id;
     private final String contactId;
     private final Time contactSent;
