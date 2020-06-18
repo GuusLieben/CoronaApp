@@ -28,7 +28,7 @@ CONFIRM::CONTACT_CONF
     CONTACT_ID=[foreign_id]
     TIMESTAMP_CONTACT_SENT=[timestamp] // Gebruiker verzend contact met ID
     TIMESTAMP_CONTACT_CONFIRMED=[timestamp] // Andere gebruiker bevestigd contact naar gebruiker
-    TIMESTAMP_GGD_CONFIRMED=[timestamp] // GGD bevestigd dat beide gebruikers bevestiging verzonden hebben
+    TIMESTAMP_CONFIRMED=[timestamp] // GGD bevestigd dat beide gebruikers bevestiging verzonden hebben
 }
 ```
 
@@ -38,7 +38,7 @@ CONFIRM::CONTACT_CONF
 SEND::INFECT_CONF
 {
     ID=[id]
-    TIMESTAMP_SENT=[timestamp]
+    TIMESTAMP_INFECTED=[timestamp]
 }
 ```
 **Received**
@@ -46,7 +46,6 @@ SEND::INFECT_CONF
 CONFIRM::INFECT_CONF
 {
     ID=[id]
-    TIMESTAMP_SENT=[timestamp] // Gebruiker verzend besmetting
     TIMESTAMP_CONFIRMED=[timestamp] // GGD bevestigd dat besmetting is ontvangen
 }
 ```
@@ -57,7 +56,7 @@ CONFIRM::INFECT_CONF
 REQUEST::USER_DATA
 {
     ID=[id]
-    TIMESTAMP=[timestamp]
+    TIMESTAMP_REQUEST=[timestamp]
 }
 ```
 **Received**
@@ -70,7 +69,6 @@ SEND::USER_DATA
     BSN=[bsn]
     BIRTHDATE=[b_date]
     TIMESTAMP_RECEIVED=[timestamp]
-    TIMESTAMP_SENT=[timestamp]
 }
 ```
 **Confirmed**
@@ -82,8 +80,6 @@ CONFIRM::USER_DATA
     LASTNAME=[l_name]
     BSN=[bsn]
     BIRTHDATE=[b_date]
-    TIMESTAMP_RECEIVED=[timestamp]
-    TIMESTAMP_SENT=[timestamp]
     TIMESTAMP_CONFIRMED=[timestamp]
 }
 ```
@@ -95,7 +91,7 @@ CONFIRM::USER_DATA
 SEND::ALERT
 {
     ID=[id]
-    TIMESTAMP=[timestamp]
+    TIMESTAMP_ALERTED=[timestamp]
     CONTACT_TIMESTAMP=[timestamp]
 }
 ```
@@ -104,7 +100,6 @@ SEND::ALERT
 CONFIRM::ALERT
 {
     ID=[id]
-    TIMESTAMP=[timestamp]
-    CONTACT_TIMESTAMP=[timestamp]
+    TIMESTAMP_CONFIRMED=[timestamp]
 }
 ```
