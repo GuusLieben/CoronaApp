@@ -24,6 +24,7 @@ public class ConfirmPacket<P extends Packet> extends Packet {
     public String serialize() {
         return new StringBuilder()
                 .append(packet.serialize())
+                // TODO : Filter out old timestamps
                 .append("\nTIMESTAMP_CONFIRMED=").append(CommonUtil.parseTimeString(confirmed))
                 .toString();
     }
