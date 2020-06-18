@@ -9,12 +9,12 @@ public class SendAlertPacket extends Packet {
     public static final SendAlertPacket EMPTY = new SendAlertPacket(null, null, null);
 
     private final String id;
-    private final Time sent;
+    private final Time alerted;
     private final Time contactInfected;
 
-    public SendAlertPacket(String id, Time sent, Time contactInfected) {
+    public SendAlertPacket(String id, Time alerted, Time contactInfected) {
         this.id = id;
-        this.sent = sent;
+        this.alerted = alerted;
         this.contactInfected = contactInfected;
     }
 
@@ -22,8 +22,8 @@ public class SendAlertPacket extends Packet {
         return id;
     }
 
-    public Time getSent() {
-        return sent;
+    public Time getAlerted() {
+        return alerted;
     }
 
     public Time getContactInfected() {
@@ -35,8 +35,8 @@ public class SendAlertPacket extends Packet {
     public String serialize() {
         return new StringBuilder()
                 .append("ID=").append(this.getId())
-                .append("\nTIMESTAMP=").append(CommonUtil.parseTimeString(this.getSent()))
-                .append("\nTIMESTAMP_CONTACT=").append(CommonUtil.parseTimeString(this.getContactInfected()))
+                .append("\nTIMESTAMP_ALERTED=").append(CommonUtil.parseTimeString(this.getAlerted()))
+                .append("\nCONTACT_TIMESTAMP=").append(CommonUtil.parseTimeString(this.getContactInfected()))
                 .toString();
     }
 
@@ -53,10 +53,10 @@ public class SendAlertPacket extends Packet {
                 case "ID":
                     builder.withId(value);
                     break;
-                case "TIMESTAMP":
+                case "TIMESTAMP_ALERTED":
                     builder.withSent(CommonUtil.parseTime(value));
                     break;
-                case "TIMESTAMP_CONTACT":
+                case "CONTACT_TIMESTAMP":
                     builder.withContactInfected(CommonUtil.parseTime(value));
                     break;
                 default:
@@ -69,7 +69,7 @@ public class SendAlertPacket extends Packet {
 
     private static final class Builder {
         private String id;
-        private Time sent;
+        private Time alerted;
         private Time contactInfected;
 
         public SendAlertPacket.Builder withId(String id) {
@@ -77,8 +77,8 @@ public class SendAlertPacket extends Packet {
             return this;
         }
 
-        public SendAlertPacket.Builder withSent(Time contactSent) {
-            this.sent = contactSent;
+        public SendAlertPacket.Builder withSent(Time alerted) {
+            this.alerted = alerted;
             return this;
         }
 
@@ -88,7 +88,7 @@ public class SendAlertPacket extends Packet {
         }
 
         public SendAlertPacket build() {
-            return new SendAlertPacket(id, sent, contactInfected);
+            return new SendAlertPacket(id, alerted, contactInfected);
         }
     }
 }
