@@ -71,6 +71,22 @@ public class TCPConnection {
     }
 
     public String sendDatagram(String data) {
+        try {
+            byte[] buffer = data.getBytes();
+            DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length, this.remoteHost, this.remotePort);
+            log.info(String.format("Sending '%s' to remote", data));
+            socket.send(datagramPacket);
+
+            byte[] receiveBuffer = new byte[Util.INITIAL_KEY_BLOCK_SIZE];
+            datagramPacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+
+            log.info("Listening for response from remote");
+            socket.receive(datagramPacket);
+            log.info("Received '" + data + "' from remote");
+            return Util.convertPacketBytes(datagramPacket.getData());
+        } catch (IOException e) {
+            return Util.INVALID;
+        }
     }
 
     public void initiateKeyExchange() throws ActivateFailedException {
