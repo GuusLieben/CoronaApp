@@ -1,6 +1,8 @@
 package org.dockbox.corona.core.util;
 
 import org.dockbox.corona.core.packets.Packet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -25,8 +27,11 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class Util {
+
+    private static final Logger log = LoggerFactory.getLogger(Util.class);
 
     public static final String INVALID = "$InvalidatedContent";
     public static final String HASH_ALGORITHM = "SHA-512";
@@ -57,6 +62,7 @@ public class Util {
         String[] packetLines = unencryptedPacket.split("\n");
         String hashLine = packetLines[packetLines.length - 1];
         if (hashLine.startsWith(Packet.HASH_PREFIX)) return hashLine.replaceFirst(Packet.HASH_PREFIX, "");
+        log.warn("Could not obtain hash of '" + unencryptedPacket + "'");
         return Util.INVALID;
     }
 
@@ -72,6 +78,7 @@ public class Util {
 
     public static String generateHash(String content) {
         try {
+            log.info("Generating hash for '" + content + "', generating with '" + HASH_ALGORITHM + "'");
             MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM);
             byte[] messageDigest = md.digest(content.getBytes(StandardCharsets.UTF_8));
 
@@ -95,6 +102,7 @@ public class Util {
     }
 
     public static Optional<KeyPair> generateKeyPair() {
+        log.info("New key pair requested, generating with '" + KEY_ALGORITHM + "'");
         try {
             KeyPairGenerator kpg = KeyPairGenerator.getInstance(KEY_ALGORITHM);
             kpg.initialize(INITIAL_KEY_BLOCK_SIZE);
@@ -110,6 +118,7 @@ public class Util {
     }
 
     public static byte[] encrypt(String content, Key key, String algorithm) {
+        log.info("Starting content encryption of '" + content + "' with '" + algorithm + "' (type:" + key.getClass().getSimpleName() + ")");
         byte[] toSend = new byte[0];
         try {
             Cipher encrypt = Cipher.getInstance(algorithm);
@@ -127,6 +136,7 @@ public class Util {
     }
 
     public static String decrypt(byte[] encrypted, Key key, String algorithm) {
+        log.info("Starting decryption of content with '" + algorithm + "' (type:" + key.getClass().getSimpleName() + ")");
         try {
             Cipher decrypt = Cipher.getInstance(algorithm);
             decrypt.init(Cipher.DECRYPT_MODE, key);
@@ -141,6 +151,7 @@ public class Util {
     }
 
     public static String encryptWithSessionKey(byte[] content, SecretKey sessionKey) {
+        log.info("Starting encryption of content with '" + SESSION_CIPHER_ALGORITHM + "' (type:SessionKey)");
         try {
             byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             IvParameterSpec ivspec = new IvParameterSpec(iv);
@@ -153,6 +164,7 @@ public class Util {
     }
 
     public static byte[] decryptWithSessionKey(String content, SecretKey sessionKey) {
+        log.info("Starting decryption of content with '" + SESSION_CIPHER_ALGORITHM + "' (type:SessionKey)");
         try {
             byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             IvParameterSpec ivspec = new IvParameterSpec(iv);
@@ -165,6 +177,7 @@ public class Util {
     }
 
     public static Optional<SecretKey> generateSessionKey(byte[] secret) {
+        log.info("New session key requested, generating with '" + SESSION_KEY_FACTORY_ALGORITHM + "' and '" + SESSION_KEY_ALGORITHM + "'");
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance(SESSION_KEY_FACTORY_ALGORITHM);
             KeySpec spec = new PBEKeySpec(toString(secret).toCharArray(), secret, 65536, 256);
@@ -185,19 +198,20 @@ public class Util {
     }
 
     public static byte[] decryptSessionKey(SecretKey sessionKey, PrivateKey privateKey) {
+        log.info("Decrypting session key with '" + SESSION_CIPHER_ALGORITHM + "' (type:PrivateKey)");
         byte[] signedAesKey = sessionKey.getEncoded();
         return toByteArray(decrypt(signedAesKey, privateKey, SESSION_CIPHER_ALGORITHM));
     }
 
     public static boolean sessionKeyIsValid(SecretKey sessionKey, PrivateKey privateKey) {
+        log.info("Validating session key");
         byte[] secret = decryptSessionKey(sessionKey, privateKey);
         Optional<SecretKey> sessionKeyClone = generateSessionKey(secret);
-        if (sessionKeyClone.isPresent())
-            return Arrays.equals(sessionKey.getEncoded(), sessionKeyClone.get().getEncoded());
-        return false;
+        return sessionKeyClone.filter(secretKey -> Arrays.equals(sessionKey.getEncoded(), secretKey.getEncoded())).isPresent();
     }
 
     public static String encryptPacket(Packet p, Key key, SecretKey sessionKey) {
+        log.info("Starting packet encryption (type:" + p.getClass().getSimpleName() + ")");
         String header = p.getHeader();
         String unencryptedContent = p.serialize();
         String hash = Packet.HASH_PREFIX + generateHash(unencryptedContent);
@@ -207,6 +221,7 @@ public class Util {
     }
 
     public static String decryptPacket(String encryptedPacket, Key key, SecretKey sessionKey) {
+        log.info("Starting packet decryption");
         byte[] sessionDecryptedContent = decryptWithSessionKey(encryptedPacket, sessionKey);
         return decrypt(sessionDecryptedContent, key);
     }
@@ -216,6 +231,7 @@ public class Util {
         if (optionalKeyPair.isPresent()) {
             KeyPair keyPair = optionalKeyPair.get();
             try {
+                log.info("Storing public key to '" + out.getName() + "'");
                 OutputStream stream;
                 stream = new FileOutputStream(out);
                 byte[] encoded = keyPair.getPublic().getEncoded();
@@ -230,6 +246,7 @@ public class Util {
     }
 
     public static Optional<PublicKey> getPublicKeyFromFile(File file) {
+        log.info("Requesting public key from file '" + file.getName() + "'");
         Path path = Paths.get(file.toURI());
         try {
             byte[] bytes = Files.readAllBytes(path);
@@ -240,5 +257,38 @@ public class Util {
             e.printStackTrace();
         }
         return Optional.empty();
+    }
+
+    public static String convertPacketBytes(byte[] in) {
+        char[] charData = new char[in.length];
+        for (int i = 0; i < charData.length; i++) {
+            charData[i] = (char) (((int) in[i]) & 0xFF);
+        }
+        return new String(charData).replaceAll("\u0000.*", "");
+    }
+
+    public static String encodeKeyToBase64(Key key) {
+        log.info("Encoding key of type '" + key.getClass().getSimpleName() + "' to Base64");
+        if (key instanceof PrivateKey) throw new IllegalArgumentException("Attempted to encode private key");
+        byte[] encodedKey = key.getEncoded();
+        return Base64.getEncoder().encodeToString(encodedKey);
+    }
+
+    public static Key decodeBase64ToKey(String base64, boolean isPublicKey) throws KeyException {
+        log.info("Decoding " + (isPublicKey ? "public" : "unknown") + " key from Base64");
+        Supplier<KeyException> exceptionSupplier = () -> new KeyException("Could not decode key");
+        try {
+            byte[] keyContent = Base64.getDecoder().decode(base64);
+            if (isPublicKey) {
+                log.info("Decoding with '" + KEY_ALGORITHM + "'");
+                KeyFactory kf = KeyFactory.getInstance(KEY_ALGORITHM);
+                X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(keyContent);
+                return kf.generatePublic(keySpecX509);
+            } else {
+                return generateSessionKey(keyContent).orElseThrow(exceptionSupplier);
+            }
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw exceptionSupplier.get();
+        }
     }
 }
