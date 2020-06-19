@@ -82,7 +82,7 @@ public class Util {
             }
             return hashtext;
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            return INVALID;
         }
     }
 
