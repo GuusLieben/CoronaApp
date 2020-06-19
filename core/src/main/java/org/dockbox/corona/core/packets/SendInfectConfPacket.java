@@ -1,6 +1,6 @@
 package org.dockbox.corona.core.packets;
 
-import org.dockbox.corona.core.util.CommonUtil;
+import org.dockbox.corona.core.util.Util;
 
 import java.util.Date;
 
@@ -33,7 +33,7 @@ public class SendInfectConfPacket extends Packet {
     public String serialize() {
         return new StringBuilder()
                 .append("ID=").append(this.getId())
-                .append("\nTIMESTAMP_INFECTED=").append(CommonUtil.parseDateString(this.getInfected()))
+                .append("\nTIMESTAMP_INFECTED=").append(Util.parseDateString(this.getInfected()))
                 .toString();
     }
 
@@ -51,7 +51,7 @@ public class SendInfectConfPacket extends Packet {
                     builder.withId(value);
                     break;
                 case "TIMESTAMP_INFECTED":
-                    builder.withContactSent(CommonUtil.parseDate(value));
+                    builder.withContactSent(Util.parseDate(value));
                     break;
                 default:
                     throw new IllegalArgumentException("Incorrect packet format");

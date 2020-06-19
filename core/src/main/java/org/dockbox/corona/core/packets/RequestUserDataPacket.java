@@ -1,6 +1,6 @@
 package org.dockbox.corona.core.packets;
 
-import org.dockbox.corona.core.util.CommonUtil;
+import org.dockbox.corona.core.util.Util;
 
 import java.util.Date;
 
@@ -38,7 +38,7 @@ public class RequestUserDataPacket extends Packet {
     public String serialize() {
         return new StringBuilder()
                 .append("ID=").append(id)
-                .append("\nTIMESTAMP_REQUEST=").append(CommonUtil.parseDateString(timestamp))
+                .append("\nTIMESTAMP_REQUEST=").append(Util.parseDateString(timestamp))
                 .toString();
     }
 
@@ -56,7 +56,7 @@ public class RequestUserDataPacket extends Packet {
                     builder.withId(value);
                     break;
                 case "TIMESTAMP_REQUEST":
-                    builder.withTimestamp(CommonUtil.parseDate(value));
+                    builder.withTimestamp(Util.parseDate(value));
                     break;
                 default:
                     throw new IllegalArgumentException("Incorrect packet format");
