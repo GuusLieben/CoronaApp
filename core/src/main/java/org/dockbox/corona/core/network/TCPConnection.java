@@ -22,18 +22,18 @@ import java.util.function.Supplier;
 
 public class TCPConnection {
 
-    private final Logger log;
+    protected final Logger log;
 
-    private PublicKey foreignPublicKey;
-    private final PrivateKey privateKey;
-    private final PublicKey publicKey;
-    private final SecretKey sessionKeySelf;
-    private SecretKey sessionKeyForeign;
+    protected PublicKey foreignPublicKey;
+    protected final PrivateKey privateKey;
+    protected final PublicKey publicKey;
+    protected final SecretKey sessionKeySelf;
+    protected SecretKey sessionKeyForeign;
 
-    private final InetAddress remoteHost;
-    private final int remotePort;
-    private final DatagramSocket socket;
-    private final boolean isServer;
+    protected final InetAddress remoteHost;
+    protected final int remotePort;
+    protected final DatagramSocket socket;
+    protected final boolean isServer;
 
     public TCPConnection(PrivateKey privateKey, PublicKey publicKey, String remoteHost, int remotePort, boolean isServer) throws IOException, InstantiationException {
         this.log = LoggerFactory.getLogger(String.format("TCP:%s:%d", remoteHost, remotePort));
@@ -66,11 +66,11 @@ public class TCPConnection {
         } else throw exceptionSupplier.get();
     }
 
-    public String sendPacket(Packet packet) {
-        return sendDatagram(Util.encryptPacket(packet, this.privateKey, this.sessionKeySelf));
+    public String sendPacket(Packet packet, boolean skipDecrypt) {
+        return sendDatagram(Util.encryptPacket(packet, this.privateKey, this.sessionKeySelf), skipDecrypt);
     }
 
-    public String sendDatagram(String data) {
+    public String sendDatagram(String data, boolean skipDecrypt) {
         try {
             byte[] buffer = data.getBytes();
             DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length, this.remoteHost, this.remotePort);
@@ -83,7 +83,9 @@ public class TCPConnection {
             log.info("Listening for response from remote");
             socket.receive(datagramPacket);
             log.info("Received '" + data + "' from remote");
-            return Util.convertPacketBytes(datagramPacket.getData());
+            String rawPacket = Util.convertPacketBytes(datagramPacket.getData());
+            if (skipDecrypt) return rawPacket;
+            else return Util.decryptPacket(rawPacket, privateKey, sessionKeyForeign);
         } catch (IOException e) {
             return Util.INVALID;
         }
@@ -93,7 +95,7 @@ public class TCPConnection {
         log.info("Initiating key exchange with remote");
         PublicKeyExchangePacket pkep = new PublicKeyExchangePacket(publicKey);
         log.info("Sending public key (self) to remote");
-        String response = sendPacket(pkep);
+        String response = sendPacket(pkep, true);
         if (
                 (isServer && response.startsWith(pkep.getHeader())) // If we are a server, make sure we receive the public key of the client
                         || ("KEY::OK".equals(response) && !isServer) // If we are a client, we already have the public key of the server
@@ -107,7 +109,7 @@ public class TCPConnection {
 
             SessionKeyExchangePacket skep = new SessionKeyExchangePacket(sessionKeySelf);
             log.info("Sending session key (self) to remote");
-            response = sendPacket(skep);
+            response = sendPacket(skep, true);
 
             if (response.startsWith(SessionKeyOkExchangePacket.EMPTY.getHeader())) {
                 log.info("Received session key OK from remote");
