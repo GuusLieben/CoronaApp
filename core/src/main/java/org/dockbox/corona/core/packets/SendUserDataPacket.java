@@ -1,7 +1,7 @@
 package org.dockbox.corona.core.packets;
 
 import org.dockbox.corona.core.model.User;
-import org.dockbox.corona.core.util.CommonUtil;
+import org.dockbox.corona.core.util.Util;
 
 import java.util.Date;
 
@@ -34,8 +34,8 @@ public class SendUserDataPacket extends Packet {
                 .append("\nFIRSTNAME=").append(user.getFirstName())
                 .append("\nLASTNAME=").append(user.getLastName())
                 .append("\nBSN=").append(user.getBSN())
-                .append("\nBIRTHDATE=").append(CommonUtil.parseDateString(user.getBirthDate()))
-                .append("\nTIMESTAMP_RECEIVED=").append(CommonUtil.parseDateString(received))
+                .append("\nBIRTHDATE=").append(Util.parseDateString(user.getBirthDate()))
+                .append("\nTIMESTAMP_RECEIVED=").append(Util.parseDateString(received))
                 .toString();
     }
 
@@ -63,10 +63,10 @@ public class SendUserDataPacket extends Packet {
                     userBuilder.withBSN(value);
                     break;
                 case "BIRTHDATE":
-                    userBuilder.withBirthDate(CommonUtil.parseDate(value));
+                    userBuilder.withBirthDate(Util.parseDate(value));
                     break;
                 case "TIMESTAMP_RECEIVED":
-                    builder.withReceived(CommonUtil.parseDate(value));
+                    builder.withReceived(Util.parseDate(value));
                     break;
             }
         }

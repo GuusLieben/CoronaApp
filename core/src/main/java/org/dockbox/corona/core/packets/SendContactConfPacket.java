@@ -1,6 +1,6 @@
 package org.dockbox.corona.core.packets;
 
-import org.dockbox.corona.core.util.CommonUtil;
+import org.dockbox.corona.core.util.Util;
 
 import java.util.Date;
 
@@ -46,8 +46,8 @@ public class SendContactConfPacket extends Packet {
         return new StringBuilder()
                 .append("ID=").append(this.getId())
                 .append("\nCONTACT_ID=").append(this.getContactId())
-                .append("\nTIMESTAMP_CONTACT_SENT=").append(CommonUtil.parseDateString(this.getContactSent()))
-                .append("\nTIMESTAMP_CONTACT_CONFIRMED=").append(CommonUtil.parseDateString(this.getContactReceived()))
+                .append("\nTIMESTAMP_CONTACT_SENT=").append(Util.parseDateString(this.getContactSent()))
+                .append("\nTIMESTAMP_CONTACT_CONFIRMED=").append(Util.parseDateString(this.getContactReceived()))
                 .toString();
     }
 
@@ -68,10 +68,10 @@ public class SendContactConfPacket extends Packet {
                     builder.withContactId(value);
                     break;
                 case "TIMESTAMP_CONTACT_SENT":
-                    builder.withContactSent(CommonUtil.parseDate(value));
+                    builder.withContactSent(Util.parseDate(value));
                     break;
                 case "TIMESTAMP_CONTACT_CONFIRMED":
-                    builder.withContactReceived(CommonUtil.parseDate(value));
+                    builder.withContactReceived(Util.parseDate(value));
                     break;
                 default:
                     throw new IllegalArgumentException("Incorrect packet format");

@@ -1,6 +1,6 @@
 package org.dockbox.corona.core.packets;
 
-import org.dockbox.corona.core.util.CommonUtil;
+import org.dockbox.corona.core.util.Util;
 
 import java.util.Date;
 import java.util.Arrays;
@@ -38,7 +38,7 @@ public class ConfirmPacket<P extends Packet> extends Packet {
 
         return new StringBuilder()
                 .append(packetSer)
-                .append("\nTIMESTAMP_CONFIRMED=").append(CommonUtil.parseDateString(confirmed))
+                .append("\nTIMESTAMP_CONFIRMED=").append(Util.parseDateString(confirmed))
                 .toString();
     }
 
@@ -48,7 +48,7 @@ public class ConfirmPacket<P extends Packet> extends Packet {
         Builder<P> builder = new Builder<P>();
 
         String confirmedStamp = lines[lines.length-1];
-        builder.withConfirmed(CommonUtil.parseDate(confirmedStamp.split("=")[1]));
+        builder.withConfirmed(Util.parseDate(confirmedStamp.split("=")[1]));
 
         String[] child = Arrays.stream(lines).filter(line -> !line.startsWith("TIMESTAMP_CONFIRMED")).toArray(String[]::new);
         builder.withPacket((P) empty.deserialize(String.join("\n", child)));
