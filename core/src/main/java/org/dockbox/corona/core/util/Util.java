@@ -32,6 +32,10 @@ public class Util {
     public static final String HASH_ALGORITHM = "SHA-512";
     public static final String KEY_ALGORITHM = "RSA";
     public static final String CIPHER_ALGORITHM = "RSA/ECB/PKCS1Padding";
+    public static final String SESSION_CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
+    public static final String SESSION_KEY_FACTORY_ALGORITHM = "PBKDF2WithHmacSHA256";
+    public static final String SESSION_KEY_ALGORITHM = "AES";
+    public static final int INITIAL_KEY_BLOCK_SIZE = 4096;
 
     public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_PATTERN);
@@ -93,7 +97,7 @@ public class Util {
     public static Optional<KeyPair> generateKeyPair() {
         try {
             KeyPairGenerator kpg = KeyPairGenerator.getInstance(KEY_ALGORITHM);
-            kpg.initialize(4096);
+            kpg.initialize(INITIAL_KEY_BLOCK_SIZE);
             return Optional.ofNullable(kpg.generateKeyPair());
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -111,8 +115,7 @@ public class Util {
             Cipher encrypt = Cipher.getInstance(algorithm);
             encrypt.init(Cipher.ENCRYPT_MODE, key);
             byte[] contentB = toByteArray(content);
-            byte[] encB = encrypt.doFinal(contentB);
-            toSend = encB;
+            toSend = encrypt.doFinal(contentB);
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException e) {
             e.printStackTrace();
         }
@@ -141,7 +144,7 @@ public class Util {
         try {
             byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             IvParameterSpec ivspec = new IvParameterSpec(iv);
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            Cipher cipher = Cipher.getInstance(SESSION_CIPHER_ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, sessionKey, ivspec);
             return Base64.getEncoder().encodeToString(cipher.doFinal(content));
         } catch (GeneralSecurityException e) {
@@ -153,7 +156,7 @@ public class Util {
         try {
             byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             IvParameterSpec ivspec = new IvParameterSpec(iv);
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            Cipher cipher = Cipher.getInstance(SESSION_CIPHER_ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, sessionKey, ivspec);
             return cipher.doFinal(Base64.getDecoder().decode(content));
         } catch (GeneralSecurityException e) {
@@ -163,11 +166,11 @@ public class Util {
 
     public static SecretKey generateSessionKey(byte[] secret) {
         try {
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(SESSION_KEY_FACTORY_ALGORITHM);
             KeySpec spec = new PBEKeySpec(toString(secret).toCharArray(), secret, 65536, 256);
             SecretKey tmp = factory.generateSecret(spec);
 
-            return new SecretKeySpec(tmp.getEncoded(), "AES");
+            return new SecretKeySpec(tmp.getEncoded(), SESSION_KEY_ALGORITHM);
         } catch (GeneralSecurityException e) {
             e.printStackTrace();
             return null;
@@ -183,7 +186,7 @@ public class Util {
 
     public static byte[] decryptSessionKey(SecretKey sessionKey, PrivateKey privateKey) {
         byte[] signedAesKey = sessionKey.getEncoded();
-        return toByteArray(decrypt(signedAesKey, privateKey, "AES/CBC/PKCS5PADDING"));
+        return toByteArray(decrypt(signedAesKey, privateKey, SESSION_CIPHER_ALGORITHM));
     }
 
     public static boolean sessionKeyIsValid(SecretKey sessionKey, PrivateKey privateKey) {
