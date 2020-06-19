@@ -90,6 +90,32 @@ public class TCPConnection {
     }
 
     public void initiateKeyExchange() throws ActivateFailedException {
+        log.info("Initiating key exchange with remote");
+        PublicKeyExchangePacket pkep = new PublicKeyExchangePacket(publicKey);
+        log.info("Sending public key (self) to remote");
+        String response = sendPacket(pkep);
+        if (
+                (isServer && response.startsWith(pkep.getHeader())) // If we are a server, make sure we receive the public key of the client
+                        || ("KEY::OK".equals(response) && !isServer) // If we are a client, we already have the public key of the server
+        ) {
+            log.info("Response OK");
+            if (isServer && response.startsWith(pkep.getHeader())) {
+                log.info("Received public key from remote");
+                PublicKeyExchangePacket pkepForeign = (PublicKeyExchangePacket) PublicKeyExchangePacket.EMPTY.deserialize(response);
+                this.foreignPublicKey = pkepForeign.getPublicKey();
+            } // Else already handled by upper condition
+
+            SessionKeyExchangePacket skep = new SessionKeyExchangePacket(sessionKeySelf);
+            log.info("Sending session key (self) to remote");
+            response = sendPacket(skep);
+
+            if (response.startsWith(SessionKeyOkExchangePacket.EMPTY.getHeader())) {
+                log.info("Received session key OK from remote");
+                SessionKeyOkExchangePacket skoep = (SessionKeyOkExchangePacket) SessionKeyOkExchangePacket.EMPTY.deserialize(response);
+                this.sessionKeyForeign = skoep.getSessionKey();
+            } else throw new ActivateFailedException("Could not activate connection (session key rejected)");
+
+        } else throw new ActivateFailedException("Could not activate connection (public key rejected)");
     }
 
     public PublicKey getForeignPublicKey() {
