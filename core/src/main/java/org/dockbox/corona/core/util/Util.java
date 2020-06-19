@@ -106,7 +106,7 @@ public class Util {
     }
 
     public static boolean isUnmodified(String content, String hash) {
-        return generateHash(content).equals(hash);
+        return generateHash(content).equals(hash) && !hash.equals(INVALID);
     }
 
     public static byte[] encrypt(String content, Key key, String algorithm) {
