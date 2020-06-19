@@ -164,20 +164,20 @@ public class Util {
         }
     }
 
-    public static SecretKey generateSessionKey(byte[] secret) {
+    public static Optional<SecretKey> generateSessionKey(byte[] secret) {
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance(SESSION_KEY_FACTORY_ALGORITHM);
             KeySpec spec = new PBEKeySpec(toString(secret).toCharArray(), secret, 65536, 256);
             SecretKey tmp = factory.generateSecret(spec);
 
-            return new SecretKeySpec(tmp.getEncoded(), SESSION_KEY_ALGORITHM);
+            return Optional.of(new SecretKeySpec(tmp.getEncoded(), SESSION_KEY_ALGORITHM));
         } catch (GeneralSecurityException e) {
             e.printStackTrace();
-            return null;
+            return Optional.empty();
         }
     }
 
-    public static SecretKey generateSessionKey() {
+    public static Optional<SecretKey> generateSessionKey() {
         SecureRandom r = new SecureRandom();
         byte[] aesKey = new byte[16];
         r.nextBytes(aesKey);
@@ -191,8 +191,10 @@ public class Util {
 
     public static boolean sessionKeyIsValid(SecretKey sessionKey, PrivateKey privateKey) {
         byte[] secret = decryptSessionKey(sessionKey, privateKey);
-        SecretKey sessionKeyClone = generateSessionKey(secret);
-        return Arrays.equals(sessionKey.getEncoded(), sessionKeyClone.getEncoded());
+        Optional<SecretKey> sessionKeyClone = generateSessionKey(secret);
+        if (sessionKeyClone.isPresent())
+            return Arrays.equals(sessionKey.getEncoded(), sessionKeyClone.get().getEncoded());
+        return false;
     }
 
     public static String encryptPacket(Packet p, Key key, SecretKey sessionKey) {
@@ -209,7 +211,7 @@ public class Util {
         return decrypt(sessionDecryptedContent, key);
     }
 
-    public static PrivateKey storePubAndGetKey(File out) {
+    public static Optional<PrivateKey> storePubAndGetKey(File out) {
         Optional<KeyPair> optionalKeyPair = generateKeyPair();
         if (optionalKeyPair.isPresent()) {
             KeyPair keyPair = optionalKeyPair.get();
@@ -222,21 +224,21 @@ public class Util {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return keyPair.getPrivate();
+            return Optional.ofNullable(keyPair.getPrivate());
         }
-        return null;
+        return Optional.empty();
     }
 
-    public static PublicKey getPublicKeyFromFile(File file) {
+    public static Optional<PublicKey> getPublicKeyFromFile(File file) {
         Path path = Paths.get(file.toURI());
         try {
             byte[] bytes = Files.readAllBytes(path);
             X509EncodedKeySpec ks = new X509EncodedKeySpec(bytes);
             KeyFactory kf = KeyFactory.getInstance(KEY_ALGORITHM);
-            return kf.generatePublic(ks);
+            return Optional.ofNullable(kf.generatePublic(ks));
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
-        return null;
+        return Optional.empty();
     }
 }
