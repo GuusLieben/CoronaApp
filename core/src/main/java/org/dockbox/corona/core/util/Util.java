@@ -56,7 +56,7 @@ public class Util {
     public static String getHash(String unencryptedPacket) {
         String[] packetLines = unencryptedPacket.split("\n");
         String hashLine = packetLines[packetLines.length - 1];
-        if (hashLine.startsWith("HASH::")) return hashLine.replaceFirst("HASH::", "");
+        if (hashLine.startsWith(Packet.HASH_PREFIX)) return hashLine.replaceFirst(Packet.HASH_PREFIX, "");
         return Util.INVALID;
     }
 
@@ -198,7 +198,7 @@ public class Util {
     public static String encryptPacket(Packet p, Key key, SecretKey sessionKey) {
         String header = p.getHeader();
         String unencryptedContent = p.serialize();
-        String hash = "HASH::" + generateHash(unencryptedContent);
+        String hash = Packet.HASH_PREFIX + generateHash(unencryptedContent);
         byte[] encryptedHeaderAndContent = encrypt(header + "\n" + unencryptedContent + "\n" + hash, key);
 
         return encryptWithSessionKey(encryptedHeaderAndContent, sessionKey);
