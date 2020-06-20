@@ -200,7 +200,7 @@ public class Util {
     public static byte[] decryptSessionKey(SecretKey sessionKey, PrivateKey privateKey) {
         log.info("Decrypting session key with '" + SESSION_CIPHER_ALGORITHM + "' (type:PrivateKey)");
         byte[] signedAesKey = sessionKey.getEncoded();
-        return toByteArray(decrypt(signedAesKey, privateKey, SESSION_CIPHER_ALGORITHM));
+        return toByteArray(decrypt(signedAesKey, sessionKey, SESSION_CIPHER_ALGORITHM));
     }
 
     public static boolean sessionKeyIsValid(SecretKey sessionKey, PrivateKey privateKey) {
