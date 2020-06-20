@@ -1,6 +1,5 @@
 package org.dockbox.corona.core.network;
 
-import org.dockbox.corona.core.packets.Packet;
 import org.dockbox.corona.core.packets.key.PublicKeyExchangePacket;
 import org.dockbox.corona.core.packets.key.SessionKeyExchangePacket;
 import org.dockbox.corona.core.packets.key.SessionKeyOkExchangePacket;
@@ -11,24 +10,23 @@ import org.slf4j.LoggerFactory;
 import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.rmi.activation.ActivateFailedException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class TCPConnection {
+public class TCPConnection extends NetworkCommunicator {
 
     protected final Logger log;
 
     protected PublicKey foreignPublicKey;
     protected final PrivateKey privateKey;
     protected final PublicKey publicKey;
-    protected final SecretKey sessionKeySelf;
-    protected SecretKey sessionKeyForeign;
+    protected final SecretKey sessionKey;
 
     protected final InetAddress remoteHost;
     protected final int remotePort;
@@ -36,6 +34,7 @@ public class TCPConnection {
     protected final boolean isServer;
 
     public TCPConnection(PrivateKey privateKey, PublicKey publicKey, String remoteHost, int remotePort, boolean isServer) throws IOException, InstantiationException {
+        super(privateKey);
         this.log = LoggerFactory.getLogger(String.format("TCP:%s:%d", remoteHost, remotePort));
 
         log.info("Initiating new TCP connection");
@@ -62,40 +61,17 @@ public class TCPConnection {
         Optional<SecretKey> optionalSessionKey = Util.generateSessionKey();
         if (optionalSessionKey.isPresent()) {
             log.info("Obtained session key (self)");
-            this.sessionKeySelf = optionalSessionKey.get();
+            this.sessionKey = optionalSessionKey.get();
         } else throw exceptionSupplier.get();
     }
 
-    public String sendPacket(Packet packet, boolean skipDecrypt) {
-        return sendDatagram(Util.encryptPacket(packet, this.privateKey, this.sessionKeySelf), skipDecrypt);
-    }
 
-    public String sendDatagram(String data, boolean skipDecrypt) {
-        try {
-            byte[] buffer = data.getBytes();
-            DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length, this.remoteHost, this.remotePort);
-            log.info(String.format("Sending '%s' to remote", data));
-            socket.send(datagramPacket);
-
-            byte[] receiveBuffer = new byte[Util.INITIAL_KEY_BLOCK_SIZE];
-            datagramPacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
-
-            log.info("Listening for response from remote");
-            socket.receive(datagramPacket);
-            log.info("Received '" + data + "' from remote");
-            String rawPacket = Util.convertPacketBytes(datagramPacket.getData());
-            if (skipDecrypt) return rawPacket;
-            else return Util.decryptPacket(rawPacket, privateKey, sessionKeyForeign);
-        } catch (IOException e) {
-            return Util.INVALID;
-        }
-    }
 
     public void initiateKeyExchange() throws ActivateFailedException {
         log.info("Initiating key exchange with remote");
         PublicKeyExchangePacket pkep = new PublicKeyExchangePacket(publicKey);
         log.info("Sending public key (self) to remote");
-        String response = sendPacket(pkep, true);
+        String response = sendPacket(pkep, true, remoteHost, remotePort);
         if (
                 (isServer && response.startsWith(pkep.getHeader())) // If we are a server, make sure we receive the public key of the client
                         || ("KEY::OK".equals(response) && !isServer) // If we are a client, we already have the public key of the server
@@ -107,14 +83,15 @@ public class TCPConnection {
                 this.foreignPublicKey = pkepForeign.getPublicKey();
             } // Else already handled by upper condition
 
-            SessionKeyExchangePacket skep = new SessionKeyExchangePacket(sessionKeySelf);
+            SessionKeyExchangePacket skep = new SessionKeyExchangePacket(sessionKey);
             log.info("Sending session key (self) to remote");
-            response = sendPacket(skep, true);
+            response = sendPacket(skep, true, remoteHost, remotePort);
 
             if (response.startsWith(SessionKeyOkExchangePacket.EMPTY.getHeader())) {
                 log.info("Received session key OK from remote");
                 SessionKeyOkExchangePacket skoep = (SessionKeyOkExchangePacket) SessionKeyOkExchangePacket.EMPTY.deserialize(response);
-                this.sessionKeyForeign = skoep.getSessionKey();
+                if (!Arrays.equals(this.sessionKey.getEncoded(), skoep.getSessionKey().getEncoded()))
+                    throw new ActivateFailedException("Could not activate connection (session key mismatch)");
             } else throw new ActivateFailedException("Could not activate connection (session key rejected)");
 
         } else throw new ActivateFailedException("Could not activate connection (public key rejected)");
@@ -132,12 +109,9 @@ public class TCPConnection {
         return publicKey;
     }
 
-    public SecretKey getSessionKeySelf() {
-        return sessionKeySelf;
-    }
-
-    public SecretKey getSessionKeyForeign() {
-        return sessionKeyForeign;
+    @Override
+    public SecretKey getSessionKey() {
+        return sessionKey;
     }
 
     public InetAddress getRemoteHost() {
@@ -148,6 +122,7 @@ public class TCPConnection {
         return remotePort;
     }
 
+    @Override
     public DatagramSocket getSocket() {
         return socket;
     }
