@@ -35,5 +35,8 @@ public class SessionKeyExchangePacket extends Packet {
             return null;
         }
     }
-    
+
+    public SecretKey getSessionKey() {
+        return sessionKey;
+    }
 }
