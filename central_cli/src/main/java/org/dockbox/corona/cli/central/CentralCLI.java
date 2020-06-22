@@ -1,18 +1,16 @@
 package org.dockbox.corona.cli.central;
 
-import org.dockbox.corona.core.util.PacketSecurityUtil;
+import org.dockbox.corona.core.util.Util;
 
 import java.io.File;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 
 public class CentralCLI {
 
-    public static final PrivateKey CENTRAL_CLI_PRIVATE = PacketSecurityUtil.storePubAndGetKey(getPublicKeyFile());
+    public static final PrivateKey CENTRAL_CLI_PRIVATE = Util.storePubAndGetKey(getPublicKeyFile()).get();
 
     public static void main(String[] args) {
-        // Sample usage
-        PublicKey publicKey = PacketSecurityUtil.getPublicKeyFromFile(getPublicKeyFile());
+
     }
 
     public static File getPublicKeyFile() {
