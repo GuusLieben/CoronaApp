@@ -13,7 +13,7 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
 
     private val socket: DatagramSocket = DatagramSocket(CentralCLI.LISTENER_PORT)
 
-    override fun handlePacket(rawPacket: String, session: SessionHandler) {
+    override fun handlePacket(rawPacket: String, session: Session) {
         val invalidPacket = Runnable {
             sendDatagram(
                 Util.INVALID,

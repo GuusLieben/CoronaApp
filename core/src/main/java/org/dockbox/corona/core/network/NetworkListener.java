@@ -19,7 +19,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
 
     private final PrivateKey privateKey;
     private final DatagramSocket socket;
-    private final Map<String, SessionHandler> sessions = new ConcurrentHashMap<>();
+    private final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     public NetworkListener(PrivateKey privateKey) throws IOException, InstantiationException {
         super(privateKey);
@@ -49,14 +49,14 @@ public abstract class NetworkListener extends NetworkCommunicator {
                         if (skep != null && Util.sessionKeyIsValid(skep.getSessionKey(), privateKey)) {
                             SessionKeyOkExchangePacket skoep = new SessionKeyOkExchangePacket(skep.getSessionKey());
                             sendPacket(skoep, true, packet.getAddress(), packet.getPort());
-                            sessions.put(remoteLocation, new SessionHandler(skoep.getSessionKey(), packet.getAddress(), packet.getPort()));
+                            sessions.put(remoteLocation, new Session(skoep.getSessionKey(), packet.getAddress(), packet.getPort()));
 
                         } else sendDatagram(KeyHeaders.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false);
                     }
 
                 } else {
                     // Encrypted
-                    SessionHandler session = sessions.get(remoteLocation);
+                    Session session = sessions.get(remoteLocation);
                     new Thread(session.injectPacket(rawPacket)).start();
                 }
             } catch (IOException | RuntimeException e) {
@@ -65,7 +65,8 @@ public abstract class NetworkListener extends NetworkCommunicator {
         }
     }
 
-    // Session key is not applicable for public listeners, this functionality is added in SessionHandler for specific sessions
+    // Session key is not applicable for public listeners,
+    // this functionality is available in the Session type
     @Override
     protected SecretKey getSessionKey() {
         throw new UnsupportedOperationException("This operation is not supported for network listeners");
@@ -75,13 +76,13 @@ public abstract class NetworkListener extends NetworkCommunicator {
         return privateKey;
     }
 
-    public Map<String, SessionHandler> getSessions() {
+    public Map<String, Session> getSessions() {
         return sessions;
     }
 
-    protected abstract void handlePacket(String rawPacket, SessionHandler session);
+    protected abstract void handlePacket(String rawPacket, Session session);
 
-    protected class SessionHandler implements Runnable {
+    protected class Session implements Runnable {
 
         private final SecretKey sessionKey;
         private final InetAddress remote;
@@ -89,12 +90,12 @@ public abstract class NetworkListener extends NetworkCommunicator {
 
         private String rawPacket;
 
-        public SessionHandler injectPacket(String rawPacket) {
+        public Session injectPacket(String rawPacket) {
             this.rawPacket = rawPacket;
             return this;
         }
 
-        public SessionHandler(SecretKey sessionKey, InetAddress remote, int remotePort) {
+        public Session(SecretKey sessionKey, InetAddress remote, int remotePort) {
             this.sessionKey = sessionKey;
             this.remote = remote;
             this.remotePort = remotePort;
