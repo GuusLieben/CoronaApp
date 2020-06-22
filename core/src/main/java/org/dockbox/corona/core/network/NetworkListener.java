@@ -39,13 +39,13 @@ public abstract class NetworkListener extends NetworkCommunicator {
                 if (rawPacket.startsWith(KeyHeaders.KEY_PREFIX.getValue())) {
                     // Plain text, no decryption needed
                     if (rawPacket.startsWith(PublicKeyExchangePacket.EMPTY.getHeader())) {
-                        PublicKeyExchangePacket pkep = (PublicKeyExchangePacket) PublicKeyExchangePacket.EMPTY.deserialize(rawPacket);
+                        PublicKeyExchangePacket pkep = PublicKeyExchangePacket.EMPTY.deserialize(rawPacket);
                         if (pkep != null) sendDatagram(KeyHeaders.KEY_OK.getValue(), true, packet.getAddress(), packet.getPort(), false);
 
                         else sendDatagram(KeyHeaders.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false);
 
                     } else if (rawPacket.startsWith(SessionKeyExchangePacket.EMPTY.getHeader())) {
-                        SessionKeyExchangePacket skep = (SessionKeyExchangePacket) SessionKeyExchangePacket.EMPTY.deserialize(rawPacket);
+                        SessionKeyExchangePacket skep = SessionKeyExchangePacket.EMPTY.deserialize(rawPacket);
                         if (skep != null && Util.sessionKeyIsValid(skep.getSessionKey(), privateKey)) {
                             SessionKeyOkExchangePacket skoep = new SessionKeyOkExchangePacket(skep.getSessionKey());
                             sendPacket(skoep, true, packet.getAddress(), packet.getPort());

@@ -40,7 +40,7 @@ public class SendUserDataPacket extends Packet {
     }
 
     @Override
-    public Packet deserialize(String message) {
+    public SendUserDataPacket deserialize(String message) {
         String[] lines = message.split("\n");
         Builder builder = new Builder();
         User.Builder userBuilder = new User.Builder();

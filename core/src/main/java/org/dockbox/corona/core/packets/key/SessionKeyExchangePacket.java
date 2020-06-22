@@ -27,7 +27,7 @@ public class SessionKeyExchangePacket extends Packet {
     }
 
     @Override
-    public Packet deserialize(String message) {
+    public SessionKeyExchangePacket deserialize(String message) {
         String base64EncodedKey = message.replaceFirst("KEY::SESSION::", "");
         try {
             return new SessionKeyExchangePacket((SecretKey) Util.decodeBase64ToKey(base64EncodedKey, true));

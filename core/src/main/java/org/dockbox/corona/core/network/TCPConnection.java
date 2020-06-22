@@ -78,7 +78,7 @@ public class TCPConnection extends NetworkCommunicator {
             log.info("Response OK");
             if (isServer && response.startsWith(pkep.getHeader())) {
                 log.info("Received public key from remote");
-                PublicKeyExchangePacket pkepForeign = (PublicKeyExchangePacket) PublicKeyExchangePacket.EMPTY.deserialize(response);
+                PublicKeyExchangePacket pkepForeign = PublicKeyExchangePacket.EMPTY.deserialize(response);
                 this.foreignPublicKey = pkepForeign.getPublicKey();
             } // Else already handled by upper condition
 
@@ -88,7 +88,7 @@ public class TCPConnection extends NetworkCommunicator {
 
             if (response.startsWith(SessionKeyOkExchangePacket.EMPTY.getHeader())) {
                 log.info("Received session key OK from remote");
-                SessionKeyOkExchangePacket skoep = (SessionKeyOkExchangePacket) SessionKeyOkExchangePacket.EMPTY.deserialize(response);
+                SessionKeyOkExchangePacket skoep = SessionKeyOkExchangePacket.EMPTY.deserialize(response);
                 if (!Arrays.equals(this.sessionKey.getEncoded(), skoep.getSessionKey().getEncoded()))
                     throw new ActivateFailedException("Could not activate connection (session key mismatch)");
             } else throw new ActivateFailedException("Could not activate connection (session key rejected)");
