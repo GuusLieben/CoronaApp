@@ -37,9 +37,11 @@ public class Util {
     public static final String HASH_ALGORITHM = "SHA-512";
     public static final String KEY_ALGORITHM = "RSA";
     public static final String CIPHER_ALGORITHM = "RSA/ECB/PKCS1Padding";
+
+    public static final String SESSION_KEY_ALGORITHM = "AES";
     public static final String SESSION_CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
     public static final String SESSION_KEY_FACTORY_ALGORITHM = "PBKDF2WithHmacSHA256";
-    public static final String SESSION_KEY_ALGORITHM = "AES";
+
     public static final int INITIAL_KEY_BLOCK_SIZE = 4096;
 
     public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
@@ -78,7 +80,7 @@ public class Util {
 
     public static String generateHash(String content) {
         try {
-            log.info("Generating hash for '" + content + "', generating with '" + HASH_ALGORITHM + "'");
+            log.info("Generating hash for '" + content.replaceAll("\n", "^newLine|") + "', generating with '" + HASH_ALGORITHM + "'");
             MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM);
             byte[] messageDigest = md.digest(content.getBytes(StandardCharsets.UTF_8));
 
@@ -118,7 +120,7 @@ public class Util {
     }
 
     public static byte[] encrypt(String content, Key key, String algorithm) {
-        log.info("Starting content encryption of '" + content + "' with '" + algorithm + "' (type:" + key.getClass().getSimpleName() + ")");
+        log.info("Starting content encryption of '" + content.replaceAll("\n", "^newLine|") + "' with '" + algorithm + "' (type:" + key.getClass().getSimpleName() + ")");
         byte[] toSend = new byte[0];
         try {
             Cipher encrypt = Cipher.getInstance(algorithm);
