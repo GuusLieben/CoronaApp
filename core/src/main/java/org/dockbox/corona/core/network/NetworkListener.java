@@ -65,7 +65,19 @@ public abstract class NetworkListener extends NetworkCommunicator {
         }
     }
 
-    protected abstract void handlePacket(String rawPacket);
+    // Session key is not applicable for public listeners, this functionality is added in SessionHandler for specific sessions
+    @Override
+    protected SecretKey getSessionKey() {
+        return null;
+    }
+
+    public PrivateKey getPrivateKey() {
+        return privateKey;
+    }
+
+    public Map<String, SessionHandler> getSessions() {
+        return sessions;
+    }
     protected abstract void handlePacket(String rawPacket, SessionHandler session);
 
     protected class SessionHandler implements Runnable {
