@@ -68,7 +68,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
     // Session key is not applicable for public listeners, this functionality is added in SessionHandler for specific sessions
     @Override
     protected SecretKey getSessionKey() {
-        return null;
+        throw new UnsupportedOperationException("This operation is not supported for network listeners");
     }
 
     public PrivateKey getPrivateKey() {
@@ -78,6 +78,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
     public Map<String, SessionHandler> getSessions() {
         return sessions;
     }
+
     protected abstract void handlePacket(String rawPacket, SessionHandler session);
 
     protected class SessionHandler implements Runnable {
