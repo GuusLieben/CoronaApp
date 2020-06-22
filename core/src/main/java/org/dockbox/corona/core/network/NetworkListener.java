@@ -42,9 +42,9 @@ public abstract class NetworkListener extends NetworkCommunicator {
                     // Plain text, no decryption needed
                     if (rawPacket.startsWith(PublicKeyExchangePacket.EMPTY.getHeader())) {
                         PublicKeyExchangePacket pkep = (PublicKeyExchangePacket) PublicKeyExchangePacket.EMPTY.deserialize(rawPacket);
-                        if (pkep != null) sendDatagram("KEY::OK", true, packet.getAddress(), packet.getPort());
+                        if (pkep != null) sendDatagram("KEY::OK", true, packet.getAddress(), packet.getPort(), false);
 
-                        else sendDatagram("KEY::REJECT", true, packet.getAddress(), packet.getPort());
+                        else sendDatagram("KEY::REJECT", true, packet.getAddress(), packet.getPort(), false);
 
                     } else if (rawPacket.startsWith(SessionKeyExchangePacket.EMPTY.getHeader())) {
                         SessionKeyExchangePacket skep = (SessionKeyExchangePacket) SessionKeyExchangePacket.EMPTY.deserialize(rawPacket);
@@ -53,7 +53,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
                             sendPacket(skoep, true, packet.getAddress(), packet.getPort());
                             sessions.put(remoteLocation, new SessionHandler(skoep.getSessionKey(), packet.getAddress(), packet.getPort()));
 
-                        } else sendDatagram("KEY::REJECT", true, packet.getAddress(), packet.getPort());
+                        } else sendDatagram("KEY::REJECT", true, packet.getAddress(), packet.getPort(), false);
                     }
 
                 } else {

@@ -26,29 +26,40 @@ public abstract class NetworkCommunicator {
     protected abstract SecretKey getSessionKey();
     protected abstract DatagramSocket getSocket();
 
-    public String sendPacket(Packet packet, boolean skipDecrypt, InetAddress remoteHost, int remotePort) {
-        return sendDatagram(Util.encryptPacket(packet, this.privateKey, getSessionKey()), skipDecrypt, remoteHost, remotePort);
+    public String sendPacket(Packet packet, boolean skipDecrypt, InetAddress remoteHost, int remotePort, boolean listenForResponse) {
+        return sendDatagram(Util.encryptPacket(packet, this.privateKey, getSessionKey()), skipDecrypt, remoteHost, remotePort, listenForResponse);
     }
 
-    public String sendDatagram(String data, boolean skipDecrypt, InetAddress remoteHost, int remotePort) {
+    public String sendPacket(Packet packet, boolean skipDecrypt, InetAddress remoteHost, int remotePort) {
+        return sendPacket(packet, skipDecrypt, remoteHost, remotePort, true);
+    }
+
+    public String sendDatagram(String data, boolean skipDecrypt, InetAddress remoteHost, int remotePort, boolean listenForResponse) {
         try {
             byte[] buffer = data.getBytes();
             DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length, remoteHost, remotePort);
             log.info(String.format("Sending '%s' to remote", data));
             getSocket().send(datagramPacket);
 
-            byte[] receiveBuffer = new byte[Util.INITIAL_KEY_BLOCK_SIZE];
-            datagramPacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+            if (listenForResponse) {
+                byte[] receiveBuffer = new byte[Util.INITIAL_KEY_BLOCK_SIZE];
+                datagramPacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
 
-            log.info("Listening for response from remote");
-            getSocket().receive(datagramPacket);
-            log.info("Received '" + data + "' from remote");
-            String rawPacket = Util.convertPacketBytes(datagramPacket.getData());
-            if (skipDecrypt) return rawPacket;
-            else return Util.decryptPacket(rawPacket, privateKey, getSessionKey());
+                log.info("Listening for response from remote");
+                getSocket().receive(datagramPacket);
+                log.info("Received '" + data + "' from remote");
+                String rawPacket = Util.convertPacketBytes(datagramPacket.getData());
+                if (skipDecrypt) return rawPacket;
+                else return Util.decryptPacket(rawPacket, privateKey, getSessionKey());
+
+            } else return "";
         } catch (IOException e) {
             return Util.INVALID;
         }
+    }
+
+    public String sendDatagram(String data, boolean skipDecrypt, InetAddress remoteHost, int remotePort) {
+        return sendDatagram(data, skipDecrypt, remoteHost, remotePort, true);
     }
 
 }

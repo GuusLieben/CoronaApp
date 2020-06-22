@@ -65,8 +65,6 @@ public class TCPConnection extends NetworkCommunicator {
         } else throw exceptionSupplier.get();
     }
 
-
-
     public void initiateKeyExchange() throws ActivateFailedException {
         log.info("Initiating key exchange with remote");
         PublicKeyExchangePacket pkep = new PublicKeyExchangePacket(publicKey);
