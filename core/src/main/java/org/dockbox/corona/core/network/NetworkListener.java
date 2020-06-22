@@ -66,6 +66,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
     }
 
     protected abstract void handlePacket(String rawPacket);
+    protected abstract void handlePacket(String rawPacket, SessionHandler session);
 
     protected class SessionHandler implements Runnable {
 
@@ -104,7 +105,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
 
         @Override
         public void run() {
-            handlePacket(getRawPacket());
+            handlePacket(getRawPacket(), this);
         }
     }
 
