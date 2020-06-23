@@ -34,4 +34,6 @@ abstract class CLIUtil {
     }
 
     abstract fun addContactToDatabase(senderId: String, contactId: String, timeOfContact: Date)
+
+    abstract fun addInfectedToDatabase(senderId: String, timeInfected: Date)
 }

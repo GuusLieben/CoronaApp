@@ -51,15 +51,25 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                 val confirmPacket = ConfirmPacket(sccp, Date.from(Instant.now()))
                 sendPacket(confirmPacket, false, session.remote, session.remotePort, false)
             }
+
             SendInfectConfPacket.EMPTY.header == header -> { // Receive from client
-                val sicp = SendInfectConfPacket.EMPTY.deserialize(content)
-                // ..
+                val sicp = SendInfectConfPacket.EMPTY.deserialize(content)!!
+
+                val receiveDiff: Long = abs(now.time - sicp.infected.time)
+                val diff = TimeUnit.SECONDS.convert(receiveDiff, TimeUnit.MILLISECONDS)
+                if (diff > 30000) log.warn("Packet took " + (diff/1000) + "s to arrive!")
+
+                util.addInfectedToDatabase(sicp.id, sicp.infected)
+                val confirmPacket = ConfirmPacket(sicp, now)
+                sendPacket(confirmPacket, false, session.remote, session.remotePort, false)
             }
+
             SendUserDataPacket.EMPTY.header == header -> { // Receive from client
                 val sudp = SendUserDataPacket.EMPTY.deserialize(content)
                 // ..
                 // Check if data was previously requested by GGD
             }
+
             RequestUserDataPacket.EMPTY.header == header -> { // Forward from GGD
                 val rudp = RequestUserDataPacket.EMPTY.deserialize(content)
                 // ..
