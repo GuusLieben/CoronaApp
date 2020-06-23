@@ -206,10 +206,11 @@ public class Util {
     }
 
     public static boolean sessionKeyIsValid(SecretKey sessionKey, PrivateKey privateKey) {
-        log.info("Validating session key");
         byte[] secret = decryptSessionKey(sessionKey, privateKey);
-        Optional<SecretKey> sessionKeyClone = generateSessionKey(secret);
-        return sessionKeyClone.filter(secretKey -> Arrays.equals(sessionKey.getEncoded(), secretKey.getEncoded())).isPresent();
+        return generateSessionKey(secret)
+                .map(secretKey -> decryptSessionKey(secretKey, privateKey))
+                .filter(secretClone -> Arrays.equals(secret, secretClone))
+                .isPresent();
     }
 
     public static String encryptPacket(Packet p, Key key, SecretKey sessionKey) {
