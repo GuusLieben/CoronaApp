@@ -58,7 +58,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
                         if (skep != null && Util.sessionKeyIsValid(skep.getSessionKey(), privateKey)) {
                             log.info("Session key OK");
                             SessionKeyOkExchangePacket skoep = new SessionKeyOkExchangePacket(skep.getSessionKey());
-                            sendPacket(skoep, true, packet.getAddress(), packet.getPort());
+                            sendPacket(skoep, true, true, packet.getAddress(), packet.getPort());
                             sessions.put(remoteLocation, new Session(skoep.getSessionKey(), packet.getAddress(), packet.getPort()));
                         } else {
                             log.info("Session key rejected");
@@ -74,6 +74,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
                 }
             } catch (IOException | RuntimeException e) {
                 log.error(e.getMessage());
+                e.printStackTrace();
             }
         }
     }

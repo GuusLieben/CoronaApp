@@ -26,12 +26,12 @@ public abstract class NetworkCommunicator {
     protected abstract SecretKey getSessionKey();
     protected abstract DatagramSocket getSocket();
 
-    public String sendPacket(Packet packet, boolean skipDecrypt, InetAddress remoteHost, int remotePort, boolean listenForResponse) {
-        return sendDatagram(Util.encryptPacket(packet, this.privateKey, getSessionKey()), skipDecrypt, remoteHost, remotePort, listenForResponse);
+    public String sendPacket(Packet packet, boolean skipDecrypt, boolean skipEncrypt, InetAddress remoteHost, int remotePort, boolean listenForResponse) {
+        return sendDatagram(skipEncrypt ? packet.serialize() : Util.encryptPacket(packet, this.privateKey, getSessionKey()), skipDecrypt, remoteHost, remotePort, listenForResponse);
     }
 
-    public String sendPacket(Packet packet, boolean skipDecrypt, InetAddress remoteHost, int remotePort) {
-        return sendPacket(packet, skipDecrypt, remoteHost, remotePort, true);
+    public String sendPacket(Packet packet, boolean skipDecrypt, boolean skipEncrypt, InetAddress remoteHost, int remotePort) {
+        return sendPacket(packet, skipDecrypt, skipEncrypt, remoteHost, remotePort, true);
     }
 
     public String sendDatagram(String data, boolean skipDecrypt, InetAddress remoteHost, int remotePort, boolean listenForResponse) {
