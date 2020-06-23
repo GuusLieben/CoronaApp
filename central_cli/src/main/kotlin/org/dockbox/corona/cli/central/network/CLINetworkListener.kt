@@ -8,11 +8,17 @@ import org.dockbox.corona.core.util.Util
 import java.net.DatagramSocket
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 
 class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
+
+    companion object {
+        // IDs, requested by Sessions
+        private val userDataQueue: MutableMap<String, MutableList<Session>> = ConcurrentHashMap()
+    }
 
     private lateinit var util: CLIUtil;
     private val socket: DatagramSocket = DatagramSocket(CentralCLI.LISTENER_PORT)
@@ -65,9 +71,20 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
             }
 
             SendUserDataPacket.EMPTY.header == header -> { // Receive from client
-                val sudp = SendUserDataPacket.EMPTY.deserialize(content)
-                // ..
-                // Check if data was previously requested by GGD
+                val sudp = SendUserDataPacket.EMPTY.deserialize(content)!!
+
+                if (userDataQueue.contains(sudp.user.id)) {
+                    util.addUserToDatabase(sudp.user)
+                    val confirmPacket = ConfirmPacket(sudp, now)
+                    sendPacket(confirmPacket, false, session.remote, session.remotePort, false)
+
+                    val requestedBySessions = userDataQueue[sudp.user.id]
+                    requestedBySessions!!.forEach { sendPacket(sudp, false, it.remote, it.remotePort, false) }
+                    userDataQueue.remove(sudp.user.id)
+                } else {
+                    log.warn("Received unrequested data from " + session.remote.hostAddress)
+                    sendDatagram("DENIED::UNREQUESTED_DATA", true, session.remote, session.remotePort, false)
+                }
             }
 
             RequestUserDataPacket.EMPTY.header == header -> { // Forward from GGD

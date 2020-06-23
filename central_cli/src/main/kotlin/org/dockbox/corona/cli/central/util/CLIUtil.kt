@@ -1,12 +1,15 @@
 package org.dockbox.corona.cli.central.util
 
+import org.dockbox.corona.core.model.User
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.ArrayList
 
 abstract class CLIUtil {
 
-    private val contactQueue: MutableMap<String, MutableList<String>> = ConcurrentHashMap();
+    companion object {
+        private val contactQueue: MutableMap<String, MutableList<String>> = ConcurrentHashMap();
+    }
 
     fun addAndVerify(senderId: String, contactId: String): Boolean {
         // If contact is in queue
@@ -22,7 +25,7 @@ abstract class CLIUtil {
         if (contactQueue.containsKey(contactId)) {
             val ids = contactQueue[contactId];
             if (ids!!.contains(senderId)) {
-                ids.drop(ids.indexOf(senderId))
+                ids.remove(senderId)
                 return true
             }
         }
@@ -36,4 +39,6 @@ abstract class CLIUtil {
     abstract fun addContactToDatabase(senderId: String, contactId: String, timeOfContact: Date)
 
     abstract fun addInfectedToDatabase(senderId: String, timeInfected: Date)
+
+    abstract fun addUserToDatabase(user: User)
 }
