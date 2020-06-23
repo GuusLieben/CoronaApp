@@ -78,14 +78,14 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
             SendUserDataPacket.EMPTY.header == header -> { // Receive from client
                 val sudp = SendUserDataPacket.EMPTY.deserialize(content)!!
 
-                if (userDataQueue.contains(sudp.user.id)) {
-                    util.addUserToDatabase(sudp.user)
+                if (userDataQueue.contains(sudp.userData.id)) {
+                    util.addUserToDatabase(sudp.userData)
                     val confirmPacket = ConfirmPacket(sudp, now)
                     sendPacket(confirmPacket, false, session.remote, session.remotePort, false)
 
-                    val requestedBySessions = userDataQueue[sudp.user.id]
+                    val requestedBySessions = userDataQueue[sudp.userData.id]
                     requestedBySessions!!.forEach { sendPacket(sudp, false, it.remote, it.remotePort, false) }
-                    userDataQueue.remove(sudp.user.id)
+                    userDataQueue.remove(sudp.userData.id)
                 } else {
                     log.warn("Received unrequested data from " + session.remote.hostAddress)
                     sendDatagram(

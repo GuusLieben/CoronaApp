@@ -2,7 +2,7 @@ package org.dockbox.corona.core.model;
 
 import java.util.Date;
 
-public class User {
+public class UserData {
 
     private final String id;
     private final String firstName;
@@ -10,7 +10,7 @@ public class User {
     private final String BSN;
     private final Date birthDate;
 
-    public User(String id, String firstName, String lastName, String BSN, Date birthDate) {
+    public UserData(String id, String firstName, String lastName, String BSN, Date birthDate) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -18,7 +18,7 @@ public class User {
         this.birthDate = birthDate;
     }
 
-    private User(Builder builder) {
+    protected UserData(Builder builder) {
         id = builder.id;
         firstName = builder.firstName;
         lastName = builder.lastName;
@@ -47,7 +47,7 @@ public class User {
     }
 
 
-    public static final class Builder {
+    public static class Builder {
         private String id;
         private String firstName;
         private String lastName;
@@ -82,8 +82,8 @@ public class User {
             return this;
         }
 
-        public User build() {
-            return new User(this);
+        public UserData build() {
+            return new UserData(this);
         }
     }
 }
