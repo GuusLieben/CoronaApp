@@ -3,3 +3,4 @@
 gradle
 */build
 *.pub
+cli_config.properties
