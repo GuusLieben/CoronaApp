@@ -18,6 +18,7 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
     companion object {
         // IDs, requested by Sessions
         private val userDataQueue: MutableMap<String, MutableList<Session>> = ConcurrentHashMap()
+        private val locations: MutableMap<String, Pair<InetAddress, Int>> = ConcurrentHashMap()
     }
 
     private lateinit var util: CLIUtil;
@@ -68,6 +69,9 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                 util.addInfectedToDatabase(sicp.id, sicp.infected)
                 val confirmPacket = ConfirmPacket(sicp, now)
                 sendPacket(confirmPacket, false, session.remote, session.remotePort, false)
+
+                // Do not keep track of their location until a infection is indicated
+                locations[sicp.id] = Pair(session.remote, session.remotePort)
             }
 
             SendUserDataPacket.EMPTY.header == header -> { // Receive from client
