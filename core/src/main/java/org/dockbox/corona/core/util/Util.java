@@ -214,10 +214,9 @@ public class Util {
 
     public static String encryptPacket(Packet p, Key key, SecretKey sessionKey) {
         log.info("Starting packet encryption (type:" + p.getClass().getSimpleName() + ")");
-        String header = p.getHeader();
         String unencryptedContent = p.serialize();
         String hash = Packet.HASH_PREFIX + generateHash(unencryptedContent);
-        byte[] encryptedHeaderAndContent = encrypt(header + "\n" + unencryptedContent + "\n" + hash, key);
+        byte[] encryptedHeaderAndContent = encrypt(unencryptedContent + "\n" + hash, key);
 
         return encryptWithSessionKey(encryptedHeaderAndContent, sessionKey);
     }
