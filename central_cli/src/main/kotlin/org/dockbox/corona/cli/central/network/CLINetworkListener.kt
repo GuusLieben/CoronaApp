@@ -4,14 +4,15 @@ import org.dockbox.corona.cli.central.CentralCLI
 import org.dockbox.corona.cli.central.util.CLIUtil
 import org.dockbox.corona.core.network.NetworkListener
 import org.dockbox.corona.core.packets.*
+import org.dockbox.corona.core.packets.key.ExtraPacketHeader
 import org.dockbox.corona.core.util.Util
 import java.net.DatagramSocket
+import java.net.InetAddress
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
-
 
 class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
 
@@ -64,7 +65,7 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
 
                 val receiveDiff: Long = abs(now.time - sicp.infected.time)
                 val diff = TimeUnit.SECONDS.convert(receiveDiff, TimeUnit.MILLISECONDS)
-                if (diff > 30000) log.warn("Packet took " + (diff/1000) + "s to arrive!")
+                if (diff > 30000) log.warn("Packet took " + (diff / 1000) + "s to arrive!")
 
                 util.addInfectedToDatabase(sicp.id, sicp.infected)
                 val confirmPacket = ConfirmPacket(sicp, now)
@@ -87,14 +88,33 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                     userDataQueue.remove(sudp.user.id)
                 } else {
                     log.warn("Received unrequested data from " + session.remote.hostAddress)
-                    sendDatagram("DENIED::UNREQUESTED_DATA", true, session.remote, session.remotePort, false)
+                    sendDatagram(
+                        ExtraPacketHeader.DENIED_UNREQUESTED.value,
+                        true,
+                        session.remote,
+                        session.remotePort,
+                        false
+                    )
                 }
             }
 
             RequestUserDataPacket.EMPTY.header == header -> { // Forward from GGD
-                val rudp = RequestUserDataPacket.EMPTY.deserialize(content)
-                // ..
-                // Verify identity and store in Queue
+                val rudp = RequestUserDataPacket.EMPTY.deserialize(content)!!
+                // Clients will only accept this request if they have indicated they are infected. When they indicate
+                // a infection their IP and port are stored. Otherwise this information is not available.
+                if (locations.containsKey(rudp.id) && util.verifyRequest(rudp)) {
+                    val loc = locations[rudp.id]!!
+                    sendPacket(rudp, false, loc.first, loc.second, false)
+                } else {
+                    log.warn("Requested data for user " + rudp.id + " but user is not currently active or did not indicate to be infected")
+                    sendDatagram(
+                        ExtraPacketHeader.FAILED_UNAVAILABLE.value,
+                        true,
+                        session.remote,
+                        session.remotePort,
+                        false
+                    )
+                }
             }
             else -> invalidPacket.run()
         }

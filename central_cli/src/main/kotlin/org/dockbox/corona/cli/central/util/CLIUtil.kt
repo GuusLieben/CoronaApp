@@ -1,6 +1,7 @@
 package org.dockbox.corona.cli.central.util
 
 import org.dockbox.corona.core.model.User
+import org.dockbox.corona.core.packets.RequestUserDataPacket
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.ArrayList
@@ -41,4 +42,6 @@ abstract class CLIUtil {
     abstract fun addInfectedToDatabase(senderId: String, timeInfected: Date)
 
     abstract fun addUserToDatabase(user: User)
+
+    abstract fun verifyRequest(requestPacket: RequestUserDataPacket): Boolean
 }

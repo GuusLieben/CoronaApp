@@ -74,6 +74,14 @@ public class SendUserDataPacket extends Packet {
         return builder.build();
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public Date getReceived() {
+        return received;
+    }
+
     public static final class Builder {
         private User user;
         private Date received;
