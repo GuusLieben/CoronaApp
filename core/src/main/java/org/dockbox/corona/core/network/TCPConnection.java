@@ -1,6 +1,6 @@
 package org.dockbox.corona.core.network;
 
-import org.dockbox.corona.core.packets.key.KeyHeaders;
+import org.dockbox.corona.core.packets.key.ExtraPacketHeader;
 import org.dockbox.corona.core.packets.key.PublicKeyExchangePacket;
 import org.dockbox.corona.core.packets.key.SessionKeyExchangePacket;
 import org.dockbox.corona.core.packets.key.SessionKeyOkExchangePacket;
@@ -73,7 +73,7 @@ public class TCPConnection extends NetworkCommunicator {
         String response = sendPacket(pkep, true, remoteHost, remotePort);
         if (
                 (isServer && response.startsWith(pkep.getHeader())) // If we are a server, make sure we receive the public key of the client
-                        || (KeyHeaders.KEY_OK.getValue().equals(response) && !isServer) // If we are a client, we already have the public key of the server
+                        || (ExtraPacketHeader.KEY_OK.getValue().equals(response) && !isServer) // If we are a client, we already have the public key of the server
         ) {
             log.info("Response OK");
             if (isServer && response.startsWith(pkep.getHeader())) {

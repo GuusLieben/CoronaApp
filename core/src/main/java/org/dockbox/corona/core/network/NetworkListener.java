@@ -1,6 +1,6 @@
 package org.dockbox.corona.core.network;
 
-import org.dockbox.corona.core.packets.key.KeyHeaders;
+import org.dockbox.corona.core.packets.key.ExtraPacketHeader;
 import org.dockbox.corona.core.packets.key.PublicKeyExchangePacket;
 import org.dockbox.corona.core.packets.key.SessionKeyExchangePacket;
 import org.dockbox.corona.core.packets.key.SessionKeyOkExchangePacket;
@@ -21,7 +21,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
     private final PrivateKey privateKey;
     private final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
-    public NetworkListener(PrivateKey privateKey) throws IOException, InstantiationException {
+    public NetworkListener(PrivateKey privateKey) {
         super(privateKey);
         this.privateKey = privateKey;
     }
@@ -40,17 +40,17 @@ public abstract class NetworkListener extends NetworkCommunicator {
                 String remoteLocation = String.format("%s:%d", packet.getAddress().getHostAddress(), packet.getPort());
                 log.info("Received packet from " + remoteLocation);
 
-                if (rawPacket.startsWith(KeyHeaders.KEY_PREFIX.getValue())) {
+                if (rawPacket.startsWith(ExtraPacketHeader.KEY_PREFIX.getValue())) {
                     log.info("Key exchange packet, validating");
                     // Plain text, no decryption needed
                     if (rawPacket.startsWith(PublicKeyExchangePacket.EMPTY.getHeader())) {
                         PublicKeyExchangePacket pkep = PublicKeyExchangePacket.EMPTY.deserialize(rawPacket);
                         if (pkep != null) {
                             log.info("Public key OK");
-                            sendDatagram(KeyHeaders.KEY_OK.getValue(), true, packet.getAddress(), packet.getPort(), false);
+                            sendDatagram(ExtraPacketHeader.KEY_OK.getValue(), true, packet.getAddress(), packet.getPort(), false);
                         } else {
                             log.info("Public key rejected");
-                            sendDatagram(KeyHeaders.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false);
+                            sendDatagram(ExtraPacketHeader.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false);
                         }
 
                     } else if (rawPacket.startsWith(SessionKeyExchangePacket.EMPTY.getHeader())) {
@@ -62,7 +62,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
                             sessions.put(remoteLocation, new Session(skoep.getSessionKey(), packet.getAddress(), packet.getPort()));
                         } else {
                             log.info("Session key rejected");
-                            sendDatagram(KeyHeaders.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false);
+                            sendDatagram(ExtraPacketHeader.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false);
                         }
                     }
 
