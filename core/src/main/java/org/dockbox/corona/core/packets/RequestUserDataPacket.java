@@ -43,7 +43,7 @@ public class RequestUserDataPacket extends Packet {
     }
 
     @Override
-    public Packet deserialize(String message) {
+    public RequestUserDataPacket deserialize(String message) {
         String[] lines = message.split("\n");
         Builder builder = new Builder();
         for (String line : lines) {

@@ -1,5 +1,6 @@
 package org.dockbox.corona.core.network;
 
+import org.dockbox.corona.core.packets.key.ExtraPacketHeader;
 import org.dockbox.corona.core.packets.key.PublicKeyExchangePacket;
 import org.dockbox.corona.core.packets.key.SessionKeyExchangePacket;
 import org.dockbox.corona.core.packets.key.SessionKeyOkExchangePacket;
@@ -72,12 +73,12 @@ public class TCPConnection extends NetworkCommunicator {
         String response = sendPacket(pkep, true, remoteHost, remotePort);
         if (
                 (isServer && response.startsWith(pkep.getHeader())) // If we are a server, make sure we receive the public key of the client
-                        || ("KEY::OK".equals(response) && !isServer) // If we are a client, we already have the public key of the server
+                        || (ExtraPacketHeader.KEY_OK.getValue().equals(response) && !isServer) // If we are a client, we already have the public key of the server
         ) {
             log.info("Response OK");
             if (isServer && response.startsWith(pkep.getHeader())) {
                 log.info("Received public key from remote");
-                PublicKeyExchangePacket pkepForeign = (PublicKeyExchangePacket) PublicKeyExchangePacket.EMPTY.deserialize(response);
+                PublicKeyExchangePacket pkepForeign = PublicKeyExchangePacket.EMPTY.deserialize(response);
                 this.foreignPublicKey = pkepForeign.getPublicKey();
             } // Else already handled by upper condition
 
@@ -87,7 +88,7 @@ public class TCPConnection extends NetworkCommunicator {
 
             if (response.startsWith(SessionKeyOkExchangePacket.EMPTY.getHeader())) {
                 log.info("Received session key OK from remote");
-                SessionKeyOkExchangePacket skoep = (SessionKeyOkExchangePacket) SessionKeyOkExchangePacket.EMPTY.deserialize(response);
+                SessionKeyOkExchangePacket skoep = SessionKeyOkExchangePacket.EMPTY.deserialize(response);
                 if (!Arrays.equals(this.sessionKey.getEncoded(), skoep.getSessionKey().getEncoded()))
                     throw new ActivateFailedException("Could not activate connection (session key mismatch)");
             } else throw new ActivateFailedException("Could not activate connection (session key rejected)");

@@ -46,7 +46,7 @@ public class SendAlertPacket extends Packet {
     }
 
     @Override
-    public Packet deserialize(String message) {
+    public SendAlertPacket deserialize(String message) {
         String[] lines = message.split("\n");
         SendAlertPacket.Builder builder = new SendAlertPacket.Builder();
         for (String line : lines) {

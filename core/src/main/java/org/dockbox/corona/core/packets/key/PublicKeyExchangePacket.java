@@ -27,7 +27,7 @@ public class PublicKeyExchangePacket extends Packet {
     }
 
     @Override
-    public Packet deserialize(String message) {
+    public PublicKeyExchangePacket deserialize(String message) {
         String base64EncodedKey = message.replaceFirst("KEY::PUBLIC::", "");
         try {
             return new PublicKeyExchangePacket((PublicKey) Util.decodeBase64ToKey(base64EncodedKey, true));

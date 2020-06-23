@@ -40,7 +40,7 @@ public class SendUserDataPacket extends Packet {
     }
 
     @Override
-    public Packet deserialize(String message) {
+    public SendUserDataPacket deserialize(String message) {
         String[] lines = message.split("\n");
         Builder builder = new Builder();
         User.Builder userBuilder = new User.Builder();
@@ -72,6 +72,14 @@ public class SendUserDataPacket extends Packet {
         }
         builder.withUser(userBuilder.build());
         return builder.build();
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public Date getReceived() {
+        return received;
     }
 
     public static final class Builder {
