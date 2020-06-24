@@ -22,7 +22,7 @@ public class ConfirmPacket<P extends Packet> extends Packet {
 
     @Override
     public String getHeader() {
-        return packet.getHeader().split("::")[1];
+        return "CONFIRM::" + packet.getHeader().split("::")[1];
     }
 
     @Override
