@@ -1,12 +1,10 @@
 package org.dockbox.corona.cli.central.db.mssql;
 
 import org.dockbox.corona.cli.central.db.ContactDAO;
-import org.dockbox.corona.core.model.Contact;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,11 +22,11 @@ public class ContactDAOImpl implements ContactDAO {
     }
 
     @Override
-    public Contact createContact(String userID1, String userID2) throws SQLException {
+    // Returns true if the query succeeded
+    public boolean createContact(String userID1, String userID2) throws SQLException {
         ResultSet rs = MSSQLQueries.CREATE_CONTACT.prepare(userID1, userID2, LocalDateTime.now(), userID1, userID2);
 
         rs.next();
-        return new Contact(rs.getString("ID_user_1"), rs.getString("ID_user_2"),
-                rs.getDate("Date_of_Contact").toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+        return (userID1.equals(rs.getString("ID_user_1")) && userID2.equals(rs.getString("ID_user_2")));
     }
 }

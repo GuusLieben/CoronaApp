@@ -16,10 +16,11 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public String createUser(String ID) throws SQLException {
+    // Returns true if the query succeeded
+    public boolean createUser(String ID) throws SQLException {
         ResultSet rs = MSSQLQueries.CREATE_USER.prepare(ID, ID);
 
         rs.next();
-        return rs.getString("ID");
+        return (ID.equals(rs.getString("ID")));
     }
 }

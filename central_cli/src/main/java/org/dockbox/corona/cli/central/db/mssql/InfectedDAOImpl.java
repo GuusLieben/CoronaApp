@@ -25,6 +25,7 @@ public class InfectedDAOImpl implements InfectedDAO {
     }
 
     @Override
+    // Returns true if the query succeeded
     public boolean createInfected(InfectedUser infected) throws SQLException {
         ResultSet rs = MSSQLQueries.CREATE_INFECTED.prepare(infected.getId(),
                 infected.getFirstName(),

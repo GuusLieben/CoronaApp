@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface ContactDAO {
     public List<String> getAllContactByID(String ID) throws SQLException;
-    public Contact createContact(String userID1, String userID2) throws SQLException;
+    public boolean createContact(String userID1, String userID2) throws SQLException;
 }
