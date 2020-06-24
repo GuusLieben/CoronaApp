@@ -37,8 +37,9 @@ public abstract class NetworkListener extends NetworkCommunicator {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 log.info("Waiting for packets on port " + getSocket().getLocalPort());
                 getSocket().receive(packet);
-
                 String rawPacket = Util.convertPacketBytes(packet.getData());
+                if (Util.INVALID.equals(rawPacket)) continue;
+
                 String remoteLocation = String.format("%s:%d", packet.getAddress().getHostAddress(), packet.getPort());
                 log.info("Received packet from " + remoteLocation);
 
