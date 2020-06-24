@@ -2,21 +2,17 @@ package org.dockbox.corona.cli.central.util;
 
 import org.dockbox.corona.core.model.UserData;
 import org.dockbox.corona.core.packets.RequestUserDataPacket;
-import org.dockbox.corona.core.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.security.PrivateKey;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Properties;
-
-import static org.dockbox.corona.cli.central.CentralCLI.getPublicKeyFile;
 
 public class MSSQLUtil extends CLIUtil {
 

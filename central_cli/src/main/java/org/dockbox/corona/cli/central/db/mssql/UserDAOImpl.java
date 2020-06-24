@@ -1,14 +1,11 @@
 package org.dockbox.corona.cli.central.db.mssql;
 
 import org.dockbox.corona.cli.central.db.UserDAO;
-import org.dockbox.corona.cli.central.util.MSSQLUtil;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class UserDAOImpl implements UserDAO {
-
 
     @Override
     public boolean checkUserExistsByID(String ID) throws SQLException {

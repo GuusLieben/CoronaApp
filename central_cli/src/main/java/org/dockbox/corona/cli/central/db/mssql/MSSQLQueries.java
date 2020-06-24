@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public enum MSSQLQueries {
+    // Never use NextLines within the queries; It will destroy them.
     // User queries
     CHECK_USER_EXISTS_BY_ID("SELECT CASE WHEN EXISTS (SELECT ID FROM [User] WHERE ID = ? ) THEN 'TRUE' ELSE 'FALSE' END AS 'Exists'"),
     CREATE_USER("INSERT INTO [User] VALUES ( ? ); SELECT ID FROM [User] WHERE ID = ? "),

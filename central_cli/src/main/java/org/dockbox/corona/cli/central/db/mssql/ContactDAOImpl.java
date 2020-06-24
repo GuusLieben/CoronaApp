@@ -1,10 +1,8 @@
 package org.dockbox.corona.cli.central.db.mssql;
 
 import org.dockbox.corona.cli.central.db.ContactDAO;
-import org.dockbox.corona.cli.central.util.MSSQLUtil;
 import org.dockbox.corona.core.model.Contact;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;

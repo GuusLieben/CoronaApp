@@ -1,14 +1,11 @@
 package org.dockbox.corona.cli.central;
 
-import org.dockbox.corona.cli.central.util.MSSQLUtil;
 import org.dockbox.corona.core.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.security.PrivateKey;
-import java.sql.*;
 
 public class CentralCLI {
 

@@ -1,11 +1,8 @@
 package org.dockbox.corona.cli.central.db.mssql;
 
 import org.dockbox.corona.cli.central.db.InfectedDAO;
-import org.dockbox.corona.cli.central.util.MSSQLUtil;
 import org.dockbox.corona.core.model.InfectedUser;
 
-import javax.xml.transform.Result;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
