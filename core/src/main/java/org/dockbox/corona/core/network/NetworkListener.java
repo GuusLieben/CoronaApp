@@ -50,10 +50,10 @@ public abstract class NetworkListener extends NetworkCommunicator {
                         if (pkep != null) {
                             log.info("Public key OK");
                             publicKeyMap.put(remoteLocation, pkep.getPublicKey());
-                            sendDatagram(ExtraPacketHeader.KEY_OK.getValue(), true, packet.getAddress(), packet.getPort(), false);
+                            sendDatagram(ExtraPacketHeader.KEY_OK.getValue(), true, packet.getAddress(), packet.getPort(), false, null);
                         } else {
                             log.info("Public key rejected");
-                            sendDatagram(ExtraPacketHeader.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false);
+                            sendDatagram(ExtraPacketHeader.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false, null);
                         }
 
                     } else if (rawPacket.startsWith(SessionKeyExchangePacket.EMPTY.getHeader())) {
@@ -62,10 +62,10 @@ public abstract class NetworkListener extends NetworkCommunicator {
                             log.info("Session key OK");
                             SessionKeyOkExchangePacket skoep = new SessionKeyOkExchangePacket(skep.getSessionKey());
                             sessions.put(remoteLocation, new Session(publicKeyMap.get(remoteLocation), skoep.getSessionKey(), packet.getAddress(), packet.getPort()));
-                            sendPacket(skoep, true, true, packet.getAddress(), packet.getPort(), false);
+                            sendPacket(skoep, true, true, packet.getAddress(), packet.getPort(), false, null, null);
                         } else {
                             log.info("Session key rejected");
-                            sendDatagram(ExtraPacketHeader.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false);
+                            sendDatagram(ExtraPacketHeader.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false, null);
                         }
                     }
 
