@@ -8,11 +8,11 @@ import org.dockbox.corona.cli.central.db.mssql.MSSQLQueries;
 import org.dockbox.corona.core.util.Util;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.sql.*;
-import java.util.Properties;
+import java.time.Instant;
+import java.time.LocalDate;
 
 public class CentralCLI {
 
@@ -28,6 +28,7 @@ public class CentralCLI {
         while (rs.next()) {
             System.out.println(rs.getBoolean("Exists"));
         }
+        MSSQLQueries.CREATE_CONTACT.prepare(con, "1111111111", "2222222222", LocalDate.now()).execute();
     }
 
     public static File getPublicKeyFile() {

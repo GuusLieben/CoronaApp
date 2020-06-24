@@ -10,12 +10,12 @@ public enum MSSQLQueries {
     CREATE_USER("INSERT INTO [User] VALUES ( ? )"),
 
     // Contact queries
-    GET_ALL_CONTACTS_BY_ID("SELECT ID_user_1 FROM [Contact] WHERE ID_user_2 = ' ? ' UNION SELECT ID_user_2 FROM [Contact] WHERE ID_user_1 = ' ? '"),
-    CREATE_CONTACT("INSERT INTO [Contact] VALUES( ' ? ' , ' ? ' , ' ? '"),
+    GET_ALL_CONTACTS_BY_ID("SELECT ID_user_1 FROM [Contact] WHERE ID_user_2 = ? UNION SELECT ID_user_2 FROM [Contact] WHERE ID_user_1 = ? "),
+    CREATE_CONTACT("INSERT INTO [Contact] VALUES( ? , ? , ? )"),
 
     // Infected queries
-    GET_INFECTED_BY_ID(""),
-    CREATE_INFECTED("");
+    GET_INFECTED_BY_ID("SELECT ID, BSN, First_Name, Last_Name, Date_of_Birth, Date_of_Infection FROM [Infected] WHERE ID = ? "),
+    CREATE_INFECTED("INSERT INTO [Infected] VALUES( ? , ? , ? , ? , ? , ? )");
 
     private final String query;
 
