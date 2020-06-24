@@ -2,7 +2,7 @@ package org.dockbox.corona.cli.central.network
 
 import org.dockbox.corona.cli.central.CentralCLI
 import org.dockbox.corona.cli.central.util.CLIUtil
-import org.dockbox.corona.cli.central.util.SimpleCLIUtil
+import org.dockbox.corona.cli.central.util.MSSQLUtil
 import org.dockbox.corona.core.network.NetworkListener
 import org.dockbox.corona.core.packets.*
 import org.dockbox.corona.core.packets.key.ExtraPacketHeader
@@ -23,7 +23,7 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
         private val locations: MutableMap<String, Pair<InetAddress, Int>> = ConcurrentHashMap()
     }
 
-    private var util: CLIUtil = SimpleCLIUtil()
+    private var util: CLIUtil = MSSQLUtil()
     private val socket: DatagramSocket = DatagramSocket(CentralCLI.LISTENER_PORT)
 
     override fun handlePacket(rawPacket: String, session: Session) {
@@ -84,14 +84,15 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
             SendUserDataPacket.EMPTY.header == header -> { // Receive from client
                 val sudp = SendUserDataPacket.EMPTY.deserialize(content)!!
 
-                if (userDataQueue.contains(sudp.user.id)) {
-                    util.addUserToDatabase(sudp.user)
+                if (userDataQueue.contains(sudp.userData.id)) {
+                    util.addUserToDatabase(sudp.userData)
                     val confirmPacket = ConfirmPacket(sudp, now)
                     sendPacket(confirmPacket, false, false, session.remote, session.remotePort, false, session.remotePublicKey, session.sessionKey)
 
-                    val requestedBySessions = userDataQueue[sudp.user.id]
+                    val requestedBySessions = userDataQueue[sudp.userData.id]
                     requestedBySessions!!.forEach { sendPacket(sudp, false, false, it.remote, it.remotePort+1, false, session.remotePublicKey, session.sessionKey) }
-                    userDataQueue.remove(sudp.user.id)
+                    userDataQueue.remove(sudp.userData.id)
+
                 } else {
                     log.warn("Received unrequested data from " + session.remote.hostAddress)
                     sendDatagram(

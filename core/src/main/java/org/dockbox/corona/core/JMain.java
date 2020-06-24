@@ -18,12 +18,12 @@ public class JMain {
                 // Performed by client, sent to server
                 PublicKey clientPublic = clientKeyPair.getPublic();
                 // Performed by client, sent to server
-                SecretKey clientSession = Util.generateSessionKey();
+                SecretKey clientSession = Util.generateSessionKey().get();
                 // Performed by server, sent to client
                 PrivateKey serverPrivate = serverKeyPair.getPrivate();
                 byte[] guessedClientSecret = Util.decryptSessionKey(clientSession, serverPrivate);
                 System.out.println("Guessed client : " + Arrays.toString(guessedClientSecret));
-                SecretKey serverSession = Util.generateSessionKey(guessedClientSecret);
+                SecretKey serverSession = Util.generateSessionKey(guessedClientSecret).get();
                 // Performed by client
                 PrivateKey clientPrivate = clientKeyPair.getPrivate();
                 byte[] guessedServerSecret = Util.decryptSessionKey(serverSession, clientPrivate);
