@@ -3,19 +3,20 @@ package org.dockbox.corona.cli.central;
 import org.dockbox.corona.cli.central.db.mssql.MSSQLQueries;
 import org.dockbox.corona.cli.central.util.MSSQLUtil;
 import org.dockbox.corona.core.util.Util;
-
-import org.dockbox.corona.cli.central.db.mssql.MSSQLQueries;
-import org.dockbox.corona.core.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.sql.*;
-import java.time.Instant;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CentralCLI {
 
+    public static final Logger log = LoggerFactory.getLogger(CentralCLI.class);
     public static final PrivateKey CENTRAL_CLI_PRIVATE = Util.storePubAndGetKey(getPublicKeyFile()).get();
     public static final int LISTENER_PORT = 9191;
 
@@ -23,12 +24,21 @@ public class CentralCLI {
         Connection con = MSSQLUtil.getConnection(MSSQLUtil.MSSQL_CONNECTION_STRING);
 
         // Example query usage
-        String id = "2222222222";
-        ResultSet rs = MSSQLQueries.CHECK_USER_EXISTS_BY_ID.prepare(con, id).executeQuery();
-        while (rs.next()) {
-            System.out.println(rs.getBoolean("Exists"));
-        }
-        MSSQLQueries.CREATE_CONTACT.prepare(con, "1111111111", "2222222222", LocalDate.now()).execute();
+//        String id = "2222222222";
+//        ResultSet rs = MSSQLQueries.CHECK_USER_EXISTS_BY_ID.prepare(con, id).executeQuery();
+//        while (rs.next()) {
+//            System.out.println(rs.getBoolean("Exists"));
+//        }
+
+//        MSSQLQueries.CREATE_CONTACT.prepare(con, "1234567890", "1111111111", LocalDateTime.now()).execute();
+
+//        ResultSet contacts = MSSQLQueries.GET_ALL_CONTACTS_BY_ID.prepare(con, "1111111111", "1111111111").executeQuery();
+//        while(contacts.next()) {
+//            System.out.println(contacts.getString("Contacts"));
+//        }
+
+
+
     }
 
     public static File getPublicKeyFile() {
