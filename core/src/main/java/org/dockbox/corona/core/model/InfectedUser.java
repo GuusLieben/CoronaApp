@@ -36,4 +36,11 @@ public class InfectedUser extends UserData {
             return new InfectedUser(this);
         }
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + "InfectedUser{" +
+                "dateOfInfection=" + dateOfInfection +
+                '}';
+    }
 }

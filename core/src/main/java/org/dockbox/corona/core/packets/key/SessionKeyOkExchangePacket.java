@@ -30,8 +30,9 @@ public class SessionKeyOkExchangePacket extends Packet {
     public SessionKeyOkExchangePacket deserialize(String message) {
         String base64EncodedKey = message.replaceFirst("KEY::SESSION_OK::", "");
         try {
-            return new SessionKeyOkExchangePacket((SecretKey) Util.decodeBase64ToKey(base64EncodedKey, true));
+            return new SessionKeyOkExchangePacket((SecretKey) Util.decodeBase64ToKey(base64EncodedKey, false));
         } catch (KeyException e) {
+            e.printStackTrace();
             return null;
         }
     }

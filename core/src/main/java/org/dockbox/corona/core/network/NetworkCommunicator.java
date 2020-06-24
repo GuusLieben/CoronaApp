@@ -11,6 +11,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 
 public abstract class NetworkCommunicator {
 
@@ -26,31 +27,36 @@ public abstract class NetworkCommunicator {
     protected abstract SecretKey getSessionKey();
     protected abstract DatagramSocket getSocket();
 
-    public String sendPacket(Packet packet, boolean skipDecrypt, InetAddress remoteHost, int remotePort, boolean listenForResponse) {
-        return sendDatagram(Util.encryptPacket(packet, this.privateKey, getSessionKey()), skipDecrypt, remoteHost, remotePort, listenForResponse);
+    public String sendPacket(Packet packet, boolean skipDecrypt, boolean skipEncrypt, InetAddress remoteHost, int remotePort, boolean listenForResponse, PublicKey foreignPublicKey, SecretKey sessionKey) {
+        return sendDatagram(skipEncrypt ? packet.serialize() : Util.encryptPacket(packet, this.privateKey, sessionKey), skipDecrypt, remoteHost, remotePort, listenForResponse, foreignPublicKey);
     }
 
-    public String sendPacket(Packet packet, boolean skipDecrypt, InetAddress remoteHost, int remotePort) {
-        return sendPacket(packet, skipDecrypt, remoteHost, remotePort, true);
+    public String sendPacket(Packet packet, boolean skipDecrypt, boolean skipEncrypt, InetAddress remoteHost, int remotePort, boolean listenForResponse, PublicKey foreignPublicKey) {
+        return sendPacket(packet, skipDecrypt, skipEncrypt, remoteHost, remotePort, listenForResponse, foreignPublicKey, getSessionKey());
     }
 
-    public String sendDatagram(String data, boolean skipDecrypt, InetAddress remoteHost, int remotePort, boolean listenForResponse) {
+    public String sendPacket(Packet packet, boolean skipDecrypt, boolean skipEncrypt, InetAddress remoteHost, int remotePort, PublicKey foreignPublicKey) {
+        return sendPacket(packet, skipDecrypt, skipEncrypt, remoteHost, remotePort, true, foreignPublicKey);
+    }
+
+    public String sendDatagram(String data, boolean skipDecrypt, InetAddress remoteHost, int remotePort, boolean listenForResponse, PublicKey foreignPublicKey) {
         try {
             byte[] buffer = data.getBytes();
             DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length, remoteHost, remotePort);
-            log.info(String.format("Sending '%s' to remote", data));
+            log.info(String.format("Sending '%s' to remote at '%s:%d'", data, remoteHost.getHostAddress(), remotePort));
             getSocket().send(datagramPacket);
 
             if (listenForResponse) {
                 byte[] receiveBuffer = new byte[Util.INITIAL_KEY_BLOCK_SIZE];
                 datagramPacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
 
-                log.info("Listening for response from remote");
+                log.info("Listening for response from remote on port " + getSocket().getLocalPort());
                 getSocket().receive(datagramPacket);
                 log.info("Received '" + data + "' from remote");
                 String rawPacket = Util.convertPacketBytes(datagramPacket.getData());
+                if (Util.INVALID.equals(rawPacket)) return Util.INVALID;
                 if (skipDecrypt) return rawPacket;
-                else return Util.decryptPacket(rawPacket, privateKey, getSessionKey());
+                else return Util.decryptPacket(rawPacket, foreignPublicKey, getSessionKey());
 
             } else return "";
         } catch (IOException e) {
@@ -58,8 +64,8 @@ public abstract class NetworkCommunicator {
         }
     }
 
-    public String sendDatagram(String data, boolean skipDecrypt, InetAddress remoteHost, int remotePort) {
-        return sendDatagram(data, skipDecrypt, remoteHost, remotePort, true);
+    public String sendDatagram(String data, boolean skipDecrypt, InetAddress remoteHost, int remotePort, PublicKey foreignPublicKey) {
+        return sendDatagram(data, skipDecrypt, remoteHost, remotePort, true, foreignPublicKey);
     }
 
 }

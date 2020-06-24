@@ -2,6 +2,7 @@ package org.dockbox.corona.cli.central.network
 
 import org.dockbox.corona.cli.central.CentralCLI
 import org.dockbox.corona.cli.central.util.CLIUtil
+import org.dockbox.corona.cli.central.util.MSSQLUtil
 import org.dockbox.corona.core.network.NetworkListener
 import org.dockbox.corona.core.packets.*
 import org.dockbox.corona.core.packets.key.ExtraPacketHeader
@@ -22,7 +23,7 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
         private val locations: MutableMap<String, Pair<InetAddress, Int>> = ConcurrentHashMap()
     }
 
-    private lateinit var util: CLIUtil;
+    private var util: CLIUtil = MSSQLUtil()
     private val socket: DatagramSocket = DatagramSocket(CentralCLI.LISTENER_PORT)
 
     override fun handlePacket(rawPacket: String, session: Session) {
@@ -31,22 +32,27 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                 Util.INVALID,
                 true,
                 session.remote,
-                session.remotePort
+                session.remotePort,
+                null
             )
         }
 
         val decryptedPacket =
-            Util.decryptPacket(rawPacket, privateKey, session.sessionKey)
+            Util.decryptPacket(rawPacket, session.remotePublicKey, session.sessionKey)
 
-        if (Util.INVALID == decryptedPacket && !Util.isUnmodified(
+        if (Util.INVALID == decryptedPacket || !Util.isUnmodified(
                 Util.getContent(decryptedPacket),
                 Util.getHash(decryptedPacket)
             )
-        ) invalidPacket.run()
+        ) {
+            log.warn("Received modified or corrupted packet")
+            invalidPacket.run()
+        }
 
         val header = Util.getHeader(decryptedPacket)
         val content = Util.getContent(decryptedPacket)
         val now = Date.from(Instant.now())
+
         when {
             SendContactConfPacket.EMPTY.header == header -> { // Receive from client
                 val sccp = SendContactConfPacket.EMPTY.deserialize(content)!!
@@ -57,7 +63,7 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
 
                 if (util.addAndVerify(sccp.id, sccp.contactId)) util.addContactToDatabase(sccp.id, sccp.contactId, sccp.contactReceived)
                 val confirmPacket = ConfirmPacket(sccp, Date.from(Instant.now()))
-                sendPacket(confirmPacket, false, session.remote, session.remotePort, false)
+                sendPacket(confirmPacket, false, false, session.remote, session.remotePort, false, session.remotePublicKey, session.sessionKey)
             }
 
             SendInfectConfPacket.EMPTY.header == header -> { // Receive from client
@@ -69,7 +75,7 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
 
                 util.addInfectedToDatabase(sicp.id, sicp.infected)
                 val confirmPacket = ConfirmPacket(sicp, now)
-                sendPacket(confirmPacket, false, session.remote, session.remotePort, false)
+                sendPacket(confirmPacket, false, false, session.remote, session.remotePort, false, session.remotePublicKey, session.sessionKey)
 
                 // Do not keep track of their location until a infection is indicated
                 locations[sicp.id] = Pair(session.remote, session.remotePort)
@@ -81,11 +87,12 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                 if (userDataQueue.contains(sudp.userData.id)) {
                     util.addUserToDatabase(sudp.userData)
                     val confirmPacket = ConfirmPacket(sudp, now)
-                    sendPacket(confirmPacket, false, session.remote, session.remotePort, false)
+                    sendPacket(confirmPacket, false, false, session.remote, session.remotePort, false, session.remotePublicKey, session.sessionKey)
 
                     val requestedBySessions = userDataQueue[sudp.userData.id]
-                    requestedBySessions!!.forEach { sendPacket(sudp, false, it.remote, it.remotePort, false) }
+                    requestedBySessions!!.forEach { sendPacket(sudp, false, false, it.remote, it.remotePort+1, false, session.remotePublicKey, session.sessionKey) }
                     userDataQueue.remove(sudp.userData.id)
+
                 } else {
                     log.warn("Received unrequested data from " + session.remote.hostAddress)
                     sendDatagram(
@@ -93,7 +100,8 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                         true,
                         session.remote,
                         session.remotePort,
-                        false
+                        false,
+                        session.remotePublicKey
                     )
                 }
             }
@@ -104,7 +112,7 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                 // a infection their IP and port are stored. Otherwise this information is not available.
                 if (locations.containsKey(rudp.id) && util.verifyRequest(rudp)) {
                     val loc = locations[rudp.id]!!
-                    sendPacket(rudp, false, loc.first, loc.second, false)
+                    sendPacket(rudp, false, false, loc.first, loc.second, false, session.remotePublicKey, session.sessionKey)
                 } else {
                     log.warn("Requested data for user " + rudp.id + " but user is not currently active or did not indicate to be infected")
                     sendDatagram(
@@ -112,7 +120,8 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                         true,
                         session.remote,
                         session.remotePort,
-                        false
+                        false,
+                        session.remotePublicKey
                     )
                 }
             }

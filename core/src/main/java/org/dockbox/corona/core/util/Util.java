@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,7 +18,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,9 +29,9 @@ import java.util.function.Supplier;
 
 public class Util {
 
-    private static final Logger log = LoggerFactory.getLogger(Util.class);
+    public static final Logger log = LoggerFactory.getLogger(Util.class);
 
-    public static final String INVALID = "$InvalidatedContent";
+    public static final String INVALID = "InvalidatedContent";
     public static final String HASH_ALGORITHM = "SHA-512";
     public static final String KEY_ALGORITHM = "RSA";
     public static final String CIPHER_ALGORITHM = "RSA/ECB/PKCS1Padding";
@@ -91,6 +89,7 @@ public class Util {
             }
             return hashtext;
         } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
             return INVALID;
         }
     }
@@ -116,7 +115,10 @@ public class Util {
     }
 
     public static boolean isUnmodified(String content, String hash) {
-        return generateHash(content).equals(hash) && !hash.equals(INVALID);
+        String newHash = generateHash(content);
+        boolean equalHash = newHash.equals(hash);
+        boolean hashNotInvalid = !hash.equals(INVALID);
+        return equalHash && hashNotInvalid;
     }
 
     public static byte[] encrypt(String content, Key key, String algorithm) {
@@ -144,6 +146,7 @@ public class Util {
             decrypt.init(Cipher.DECRYPT_MODE, key);
             return toString(decrypt.doFinal(encrypted));
         } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException e) {
+            e.printStackTrace();
             return Util.INVALID;
         }
     }
@@ -161,6 +164,7 @@ public class Util {
             cipher.init(Cipher.ENCRYPT_MODE, sessionKey, ivspec);
             return Base64.getEncoder().encodeToString(cipher.doFinal(content));
         } catch (GeneralSecurityException e) {
+            e.printStackTrace();
             return INVALID;
         }
     }
@@ -174,22 +178,14 @@ public class Util {
             cipher.init(Cipher.DECRYPT_MODE, sessionKey, ivspec);
             return cipher.doFinal(Base64.getDecoder().decode(content));
         } catch (GeneralSecurityException e) {
+            e.printStackTrace();
             return new byte[0];
         }
     }
 
     public static Optional<SecretKey> generateSessionKey(byte[] secret) {
         log.info("New session key requested, generating with '" + SESSION_KEY_FACTORY_ALGORITHM + "' and '" + SESSION_KEY_ALGORITHM + "'");
-        try {
-            SecretKeyFactory factory = SecretKeyFactory.getInstance(SESSION_KEY_FACTORY_ALGORITHM);
-            KeySpec spec = new PBEKeySpec(toString(secret).toCharArray(), secret, 65536, 256);
-            SecretKey tmp = factory.generateSecret(spec);
-
-            return Optional.of(new SecretKeySpec(tmp.getEncoded(), SESSION_KEY_ALGORITHM));
-        } catch (GeneralSecurityException e) {
-            e.printStackTrace();
-            return Optional.empty();
-        }
+        return Optional.of(new SecretKeySpec(secret, SESSION_KEY_ALGORITHM));
     }
 
     public static Optional<SecretKey> generateSessionKey() {
@@ -206,18 +202,20 @@ public class Util {
     }
 
     public static boolean sessionKeyIsValid(SecretKey sessionKey, PrivateKey privateKey) {
-        log.info("Validating session key");
         byte[] secret = decryptSessionKey(sessionKey, privateKey);
-        Optional<SecretKey> sessionKeyClone = generateSessionKey(secret);
-        return sessionKeyClone.filter(secretKey -> Arrays.equals(sessionKey.getEncoded(), secretKey.getEncoded())).isPresent();
+        return generateSessionKey(secret)
+                .map(secretKey -> decryptSessionKey(secretKey, privateKey))
+                .filter(secretClone -> Arrays.equals(secret, secretClone))
+                .isPresent();
     }
 
     public static String encryptPacket(Packet p, Key key, SecretKey sessionKey) {
         log.info("Starting packet encryption (type:" + p.getClass().getSimpleName() + ")");
-        String header = p.getHeader();
         String unencryptedContent = p.serialize();
         String hash = Packet.HASH_PREFIX + generateHash(unencryptedContent);
-        byte[] encryptedHeaderAndContent = encrypt(header + "\n" + unencryptedContent + "\n" + hash, key);
+        if (!unencryptedContent.startsWith(p.getHeader()))
+            unencryptedContent = p.getHeader() + '\n' + unencryptedContent;
+        byte[] encryptedHeaderAndContent = encrypt(unencryptedContent + "\n" + hash, key);
 
         return encryptWithSessionKey(encryptedHeaderAndContent, sessionKey);
     }
@@ -290,6 +288,7 @@ public class Util {
                 return generateSessionKey(keyContent).orElseThrow(exceptionSupplier);
             }
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            e.printStackTrace();
             throw exceptionSupplier.get();
         }
     }

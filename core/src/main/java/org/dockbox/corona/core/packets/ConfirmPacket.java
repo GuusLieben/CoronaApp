@@ -7,8 +7,11 @@ import java.util.Arrays;
 
 public class ConfirmPacket<P extends Packet> extends Packet {
 
-    private final P packet;
-    private final Date confirmed;
+    private P packet;
+    private Date confirmed;
+
+    public ConfirmPacket() {
+    }
 
     public ConfirmPacket(P packet, Date confirmed) {
         this.packet = packet;
@@ -22,7 +25,7 @@ public class ConfirmPacket<P extends Packet> extends Packet {
 
     @Override
     public String getHeader() {
-        return packet.getHeader().split("::")[1];
+        return "CONFIRM::" + packet.getHeader().split("::")[1];
     }
 
     @Override
@@ -61,6 +64,13 @@ public class ConfirmPacket<P extends Packet> extends Packet {
         throw new UnsupportedOperationException("Cannot deserialize confirm packet without empty child");
     }
 
+    public P getPacket() {
+        return packet;
+    }
+
+    public Date getConfirmed() {
+        return confirmed;
+    }
 
     public static final class Builder<P extends Packet> {
         private P packet;

@@ -13,12 +13,14 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class NetworkListener extends NetworkCommunicator {
 
     private final PrivateKey privateKey;
+    private final Map<String, PublicKey> publicKeyMap = new ConcurrentHashMap<>();
     private final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     public NetworkListener(PrivateKey privateKey) {
@@ -35,8 +37,9 @@ public abstract class NetworkListener extends NetworkCommunicator {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 log.info("Waiting for packets on port " + getSocket().getLocalPort());
                 getSocket().receive(packet);
-
                 String rawPacket = Util.convertPacketBytes(packet.getData());
+                if (Util.INVALID.equals(rawPacket)) continue;
+
                 String remoteLocation = String.format("%s:%d", packet.getAddress().getHostAddress(), packet.getPort());
                 log.info("Received packet from " + remoteLocation);
 
@@ -47,22 +50,23 @@ public abstract class NetworkListener extends NetworkCommunicator {
                         PublicKeyExchangePacket pkep = PublicKeyExchangePacket.EMPTY.deserialize(rawPacket);
                         if (pkep != null) {
                             log.info("Public key OK");
-                            sendDatagram(ExtraPacketHeader.KEY_OK.getValue(), true, packet.getAddress(), packet.getPort(), false);
+                            publicKeyMap.put(remoteLocation, pkep.getPublicKey());
+                            sendDatagram(ExtraPacketHeader.KEY_OK.getValue(), true, packet.getAddress(), packet.getPort(), false, null);
                         } else {
                             log.info("Public key rejected");
-                            sendDatagram(ExtraPacketHeader.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false);
+                            sendDatagram(ExtraPacketHeader.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false, null);
                         }
 
                     } else if (rawPacket.startsWith(SessionKeyExchangePacket.EMPTY.getHeader())) {
                         SessionKeyExchangePacket skep = SessionKeyExchangePacket.EMPTY.deserialize(rawPacket);
-                        if (skep != null && Util.sessionKeyIsValid(skep.getSessionKey(), privateKey)) {
+                        if (skep != null && Util.sessionKeyIsValid(skep.getSessionKey(), privateKey) && publicKeyMap.containsKey(remoteLocation)) {
                             log.info("Session key OK");
                             SessionKeyOkExchangePacket skoep = new SessionKeyOkExchangePacket(skep.getSessionKey());
-                            sendPacket(skoep, true, packet.getAddress(), packet.getPort());
-                            sessions.put(remoteLocation, new Session(skoep.getSessionKey(), packet.getAddress(), packet.getPort()));
+                            sessions.put(remoteLocation, new Session(publicKeyMap.get(remoteLocation), skoep.getSessionKey(), packet.getAddress(), packet.getPort()));
+                            sendPacket(skoep, true, true, packet.getAddress(), packet.getPort(), false, null, null);
                         } else {
                             log.info("Session key rejected");
-                            sendDatagram(ExtraPacketHeader.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false);
+                            sendDatagram(ExtraPacketHeader.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false, null);
                         }
                     }
 
@@ -74,6 +78,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
                 }
             } catch (IOException | RuntimeException e) {
                 log.error(e.getMessage());
+                e.printStackTrace();
             }
         }
     }
@@ -97,6 +102,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
 
     protected class Session implements Runnable {
 
+        private final PublicKey remotePublicKey;
         private final SecretKey sessionKey;
         private final InetAddress remote;
         private final int remotePort;
@@ -109,7 +115,8 @@ public abstract class NetworkListener extends NetworkCommunicator {
             return this;
         }
 
-        public Session(SecretKey sessionKey, InetAddress remote, int remotePort) {
+        public Session(PublicKey remotePublicKey, SecretKey sessionKey, InetAddress remote, int remotePort) {
+            this.remotePublicKey = remotePublicKey;
             this.sessionKey = sessionKey;
             this.remote = remote;
             this.remotePort = remotePort;
@@ -130,6 +137,10 @@ public abstract class NetworkListener extends NetworkCommunicator {
 
         public String getRawPacket() {
             return rawPacket;
+        }
+
+        public PublicKey getRemotePublicKey() {
+            return remotePublicKey;
         }
 
         @Override
