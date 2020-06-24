@@ -1,8 +1,8 @@
 package org.dockbox.corona.cli.central.db;
 
-import org.dockbox.corona.core.model.UserData;
+import java.sql.SQLException;
 
 public interface UserDAO {
-     public UserData checkUserExistsByID(int ID);
-     public UserData createUser(int ID);
+     public boolean checkUserExistsByID(String ID) throws SQLException;
+     public String createUser(String ID) throws SQLException;
 }

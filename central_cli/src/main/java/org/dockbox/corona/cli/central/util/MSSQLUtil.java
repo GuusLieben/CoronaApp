@@ -48,6 +48,14 @@ public class MSSQLUtil extends CLIUtil {
         return con;
     }
 
+    public static void closeConnection(Connection con) {
+        try {
+            con.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
     private static String getValueFromConnectionString(String connectionString, String property) {
         String[] split = connectionString.split(property+'=');
         return split[1].split(";")[0];
