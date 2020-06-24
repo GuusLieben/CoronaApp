@@ -2,8 +2,8 @@
 This document describes all endpoints that need to be implemented.
 
 ## User Endpoints
-**GetUserByID**
-| Returns a User
+**CheckUserExistsByID**
+| Returns a boolean
 
 **CreateUser**
 | Returns the new User
