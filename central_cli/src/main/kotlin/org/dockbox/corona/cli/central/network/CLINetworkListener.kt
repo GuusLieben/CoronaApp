@@ -37,7 +37,7 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
         }
 
         val decryptedPacket =
-            Util.decryptPacket(rawPacket, privateKey, session.sessionKey)
+            Util.decryptPacket(rawPacket, session.remotePublicKey, session.sessionKey)
 
         if (Util.INVALID == decryptedPacket && !Util.isUnmodified(
                 Util.getContent(decryptedPacket),

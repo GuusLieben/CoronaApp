@@ -13,12 +13,14 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class NetworkListener extends NetworkCommunicator {
 
     private final PrivateKey privateKey;
+    private final Map<String, PublicKey> publicKeyMap = new ConcurrentHashMap<>();
     private final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     public NetworkListener(PrivateKey privateKey) {
@@ -47,6 +49,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
                         PublicKeyExchangePacket pkep = PublicKeyExchangePacket.EMPTY.deserialize(rawPacket);
                         if (pkep != null) {
                             log.info("Public key OK");
+                            publicKeyMap.put(remoteLocation, pkep.getPublicKey());
                             sendDatagram(ExtraPacketHeader.KEY_OK.getValue(), true, packet.getAddress(), packet.getPort(), false);
                         } else {
                             log.info("Public key rejected");
@@ -55,11 +58,11 @@ public abstract class NetworkListener extends NetworkCommunicator {
 
                     } else if (rawPacket.startsWith(SessionKeyExchangePacket.EMPTY.getHeader())) {
                         SessionKeyExchangePacket skep = SessionKeyExchangePacket.EMPTY.deserialize(rawPacket);
-                        if (skep != null && Util.sessionKeyIsValid(skep.getSessionKey(), privateKey)) {
+                        if (skep != null && Util.sessionKeyIsValid(skep.getSessionKey(), privateKey) && publicKeyMap.containsKey(remoteLocation)) {
                             log.info("Session key OK");
                             SessionKeyOkExchangePacket skoep = new SessionKeyOkExchangePacket(skep.getSessionKey());
-                            sendPacket(skoep, true, true, packet.getAddress(), packet.getPort());
-                            sessions.put(remoteLocation, new Session(skoep.getSessionKey(), packet.getAddress(), packet.getPort()));
+                            sessions.put(remoteLocation, new Session(publicKeyMap.get(remoteLocation), skoep.getSessionKey(), packet.getAddress(), packet.getPort()));
+                            sendPacket(skoep, true, true, packet.getAddress(), packet.getPort(), false);
                         } else {
                             log.info("Session key rejected");
                             sendDatagram(ExtraPacketHeader.KEY_REJECTED.getValue(), true, packet.getAddress(), packet.getPort(), false);
@@ -98,6 +101,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
 
     protected class Session implements Runnable {
 
+        private final PublicKey remotePublicKey;
         private final SecretKey sessionKey;
         private final InetAddress remote;
         private final int remotePort;
@@ -110,7 +114,8 @@ public abstract class NetworkListener extends NetworkCommunicator {
             return this;
         }
 
-        public Session(SecretKey sessionKey, InetAddress remote, int remotePort) {
+        public Session(PublicKey remotePublicKey, SecretKey sessionKey, InetAddress remote, int remotePort) {
+            this.remotePublicKey = remotePublicKey;
             this.sessionKey = sessionKey;
             this.remote = remote;
             this.remotePort = remotePort;
@@ -131,6 +136,10 @@ public abstract class NetworkListener extends NetworkCommunicator {
 
         public String getRawPacket() {
             return rawPacket;
+        }
+
+        public PublicKey getRemotePublicKey() {
+            return remotePublicKey;
         }
 
         @Override
