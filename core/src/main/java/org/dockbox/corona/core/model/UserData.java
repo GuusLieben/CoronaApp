@@ -86,4 +86,15 @@ public class UserData {
             return new UserData(this);
         }
     }
+
+    @Override
+    public String toString() {
+        return "UserData{" +
+                "id='" + id + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", BSN='" + BSN + '\'' +
+                ", birthDate=" + birthDate +
+                '}';
+    }
 }

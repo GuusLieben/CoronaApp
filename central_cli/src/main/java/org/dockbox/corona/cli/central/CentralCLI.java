@@ -2,6 +2,7 @@ package org.dockbox.corona.cli.central;
 
 import org.dockbox.corona.cli.central.db.mssql.MSSQLQueries;
 import org.dockbox.corona.cli.central.util.MSSQLUtil;
+import org.dockbox.corona.core.model.InfectedUser;
 import org.dockbox.corona.core.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +38,20 @@ public class CentralCLI {
 //            System.out.println(contacts.getString("Contacts"));
 //        }
 
+//        ResultSet infected = MSSQLQueries.GET_INFECTED_BY_ID.prepare(con, "1111111111").executeQuery();
+//        InfectedUser.Builder builder = new InfectedUser.Builder();
+//        while(infected.next()) {
+//            builder.withDateOfInfection(infected.getDate("Date_of_Infection"))
+//                    .withId(infected.getString("ID"))
+//                    .withBSN(infected.getString("BSN"))
+//                    .withFirstName(infected.getString("First_Name"))
+//                    .withLastName(infected.getString("Last_Name"))
+//                    .withBirthDate(infected.getDate("Date_of_Birth"));
+//        }
+//        InfectedUser iu = builder.build();
+//        System.out.println(iu.toString());
 
-
+//        MSSQLQueries.CREATE_INFECTED.prepare(con,  "2222222222", "Guus", "Lieben", "1969-04-20", "888888888", "2021-04-26").execute();
     }
 
     public static File getPublicKeyFile() {
