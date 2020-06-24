@@ -187,16 +187,7 @@ public class Util {
 
     public static Optional<SecretKey> generateSessionKey(byte[] secret) {
         log.info("New session key requested, generating with '" + SESSION_KEY_FACTORY_ALGORITHM + "' and '" + SESSION_KEY_ALGORITHM + "'");
-        try {
-            SecretKeyFactory factory = SecretKeyFactory.getInstance(SESSION_KEY_FACTORY_ALGORITHM);
-            KeySpec spec = new PBEKeySpec(toString(secret).toCharArray(), secret, 65536, 256);
-            SecretKey tmp = factory.generateSecret(spec);
-
-            return Optional.of(new SecretKeySpec(tmp.getEncoded(), SESSION_KEY_ALGORITHM));
-        } catch (GeneralSecurityException e) {
-            e.printStackTrace();
-            return Optional.empty();
-        }
+        return Optional.of(new SecretKeySpec(secret, SESSION_KEY_ALGORITHM));
     }
 
     public static Optional<SecretKey> generateSessionKey() {
