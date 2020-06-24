@@ -4,6 +4,7 @@ import org.dockbox.corona.cli.central.db.InfectedDAO;
 import org.dockbox.corona.cli.central.util.MSSQLUtil;
 import org.dockbox.corona.core.model.InfectedUser;
 
+import javax.xml.transform.Result;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,9 +12,7 @@ import java.sql.SQLException;
 public class InfectedDAOImpl implements InfectedDAO {
     @Override
     public InfectedUser getInfectedByID(String ID) throws SQLException {
-        Connection con = MSSQLUtil.openConnection(MSSQLUtil.MSSQL_CONNECTION_STRING);
-        ResultSet rs = MSSQLQueries.GET_INFECTED_BY_ID.prepare(con, ID).executeQuery();
-        MSSQLUtil.closeConnection(con);
+        ResultSet rs = MSSQLQueries.GET_INFECTED_BY_ID.prepare(ID);
 
         InfectedUser.Builder builder = new InfectedUser.Builder();
         rs.next();
@@ -30,14 +29,12 @@ public class InfectedDAOImpl implements InfectedDAO {
 
     @Override
     public boolean createInfected(InfectedUser infected) throws SQLException {
-        Connection con = MSSQLUtil.openConnection(MSSQLUtil.MSSQL_CONNECTION_STRING);
-        ResultSet rs = MSSQLQueries.CREATE_INFECTED.prepare(con,  infected.getId(),
+        ResultSet rs = MSSQLQueries.CREATE_INFECTED.prepare(infected.getId(),
                 infected.getFirstName(),
                 infected.getLastName(),
                 infected.getBirthDate(),
                 infected.getBSN(),
-                infected.getDateOfInfection()).executeQuery();
-        MSSQLUtil.closeConnection(con);
+                infected.getDateOfInfection());
 
         rs.next();
         return infected.getId().equals(rs.getString("ID"));

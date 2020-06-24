@@ -16,9 +16,7 @@ public class ContactDAOImpl implements ContactDAO {
 
     @Override
     public List<String> getAllContactByID(String ID) throws SQLException {
-        Connection con = MSSQLUtil.openConnection(MSSQLUtil.MSSQL_CONNECTION_STRING);
-        ResultSet rs = MSSQLQueries.GET_ALL_CONTACTS_BY_ID.prepare(con, ID, ID).executeQuery();
-        MSSQLUtil.closeConnection(con);
+        ResultSet rs = MSSQLQueries.GET_ALL_CONTACTS_BY_ID.prepare(ID, ID);
 
         List<String> contacts = new ArrayList<>();
         while(rs.next()) {
@@ -29,13 +27,10 @@ public class ContactDAOImpl implements ContactDAO {
 
     @Override
     public Contact createContact(String userID1, String userID2) throws SQLException {
-        Connection con = MSSQLUtil.openConnection(MSSQLUtil.MSSQL_CONNECTION_STRING);
-        ResultSet rs = MSSQLQueries.CREATE_CONTACT.prepare(con, userID1, userID2, LocalDateTime.now(), userID1, userID2).executeQuery();
-        MSSQLUtil.closeConnection(con);
+        ResultSet rs = MSSQLQueries.CREATE_CONTACT.prepare(userID1, userID2, LocalDateTime.now(), userID1, userID2);
 
         rs.next();
         return new Contact(rs.getString("ID_user_1"), rs.getString("ID_user_2"),
                 rs.getDate("Date_of_Contact").toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-
     }
 }

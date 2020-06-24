@@ -12,9 +12,7 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public boolean checkUserExistsByID(String ID) throws SQLException {
-        Connection con = MSSQLUtil.openConnection(MSSQLUtil.MSSQL_CONNECTION_STRING);
-        ResultSet rs = MSSQLQueries.CHECK_USER_EXISTS_BY_ID.prepare(con, ID).executeQuery();
-        MSSQLUtil.closeConnection(con);
+        ResultSet rs = MSSQLQueries.CHECK_USER_EXISTS_BY_ID.prepare(ID);
 
         rs.next();
         return rs.getBoolean("Exists");
@@ -22,9 +20,7 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public String createUser(String ID) throws SQLException {
-        Connection con = MSSQLUtil.openConnection(MSSQLUtil.MSSQL_CONNECTION_STRING);
-        ResultSet rs = MSSQLQueries.CREATE_USER.prepare(con, ID, ID).executeQuery();
-        MSSQLUtil.closeConnection(con);
+        ResultSet rs = MSSQLQueries.CREATE_USER.prepare(ID, ID);
 
         rs.next();
         return rs.getString("ID");

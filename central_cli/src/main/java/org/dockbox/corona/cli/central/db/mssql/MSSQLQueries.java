@@ -1,5 +1,7 @@
 package org.dockbox.corona.cli.central.db.mssql;
 
+import org.dockbox.corona.cli.central.util.MSSQLUtil;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -23,12 +25,20 @@ public enum MSSQLQueries {
         this.query = query;
     }
 
-    public PreparedStatement prepare(Connection conn, Object... args) throws SQLException {
+    public <T> T prepare(Object... args) throws SQLException {
+        return prepareWithRes(true, args);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T prepareWithRes(boolean hasResult, Object... args) throws SQLException {
+        Connection conn = MSSQLUtil.openConnection(MSSQLUtil.MSSQL_CONNECTION_STRING);
         PreparedStatement statement = conn.prepareStatement(this.query);
         for (int i = 0; i < args.length; i++) {
             Object obj = args[i];
             statement.setObject(i + 1, obj);
         }
-        return statement;
+        T res = hasResult ? (T) statement.executeQuery() : (T) (Boolean) statement.execute();
+        conn.close();
+        return res;
     }
 }
