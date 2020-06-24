@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,7 +18,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,7 +29,7 @@ import java.util.function.Supplier;
 
 public class Util {
 
-    private static final Logger log = LoggerFactory.getLogger(Util.class);
+    public static final Logger log = LoggerFactory.getLogger(Util.class);
 
     public static final String INVALID = "InvalidatedContent";
     public static final String HASH_ALGORITHM = "SHA-512";
