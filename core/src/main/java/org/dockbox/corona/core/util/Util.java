@@ -91,6 +91,7 @@ public class Util {
             }
             return hashtext;
         } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
             return INVALID;
         }
     }
@@ -144,6 +145,7 @@ public class Util {
             decrypt.init(Cipher.DECRYPT_MODE, key);
             return toString(decrypt.doFinal(encrypted));
         } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException e) {
+            e.printStackTrace();
             return Util.INVALID;
         }
     }
@@ -161,6 +163,7 @@ public class Util {
             cipher.init(Cipher.ENCRYPT_MODE, sessionKey, ivspec);
             return Base64.getEncoder().encodeToString(cipher.doFinal(content));
         } catch (GeneralSecurityException e) {
+            e.printStackTrace();
             return INVALID;
         }
     }
@@ -174,6 +177,7 @@ public class Util {
             cipher.init(Cipher.DECRYPT_MODE, sessionKey, ivspec);
             return cipher.doFinal(Base64.getDecoder().decode(content));
         } catch (GeneralSecurityException e) {
+            e.printStackTrace();
             return new byte[0];
         }
     }
@@ -290,6 +294,7 @@ public class Util {
                 return generateSessionKey(keyContent).orElseThrow(exceptionSupplier);
             }
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            e.printStackTrace();
             throw exceptionSupplier.get();
         }
     }
