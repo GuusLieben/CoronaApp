@@ -1,8 +1,6 @@
 package org.dockbox.corona.cli.central;
 
-import org.dockbox.corona.cli.central.db.mssql.MSSQLQueries;
 import org.dockbox.corona.cli.central.util.MSSQLUtil;
-import org.dockbox.corona.core.model.InfectedUser;
 import org.dockbox.corona.core.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CentralCLI {
 
@@ -22,7 +17,7 @@ public class CentralCLI {
     public static final int LISTENER_PORT = 9191;
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException, IOException {
-        Connection con = MSSQLUtil.getConnection(MSSQLUtil.MSSQL_CONNECTION_STRING);
+        Connection con = MSSQLUtil.openConnection(MSSQLUtil.MSSQL_CONNECTION_STRING);
 
         // Example query usage
 //        String id = "2222222222";

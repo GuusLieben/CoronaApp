@@ -15,7 +15,7 @@ public enum MSSQLQueries {
 
     // Infected queries
     GET_INFECTED_BY_ID("SELECT ID, BSN, First_Name, Last_Name, Date_of_Birth, Date_of_Infection FROM [Infected] WHERE ID = ? "),
-    CREATE_INFECTED("INSERT INTO [Infected] VALUES( ? , ? , ? , ? , ? , ? )");
+    CREATE_INFECTED("INSERT INTO [Infected] VALUES( ? , ? , ? , ? , ? , ? );  SELECT ID, BSN, First_Name, Last_Name, Date_of_Birth, Date_of_Infection FROM [Infected] WHERE ID = ? ");
 
     private final String query;
 

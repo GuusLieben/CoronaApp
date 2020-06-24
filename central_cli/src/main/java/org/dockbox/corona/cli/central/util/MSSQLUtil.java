@@ -38,7 +38,7 @@ public class MSSQLUtil extends CLIUtil {
             + ";database=" + properties.getProperty("db_name");
 
     @NotNull
-    public static Connection getConnection(String connectionUrl) throws SQLException {
+    public static Connection openConnection(String connectionUrl) throws SQLException {
         Connection con = DriverManager.getConnection(connectionUrl);
         if (con.prepareStatement("SELECT 1").execute()) {
             String dbName = getValueFromConnectionString(connectionUrl, "database");
