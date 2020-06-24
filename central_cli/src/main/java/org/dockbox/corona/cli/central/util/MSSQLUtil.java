@@ -4,6 +4,8 @@ import org.dockbox.corona.core.model.UserData;
 import org.dockbox.corona.core.packets.RequestUserDataPacket;
 import org.dockbox.corona.core.util.Util;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -17,6 +19,8 @@ import java.util.Properties;
 import static org.dockbox.corona.cli.central.CentralCLI.getPublicKeyFile;
 
 public class MSSQLUtil extends CLIUtil {
+
+    public static final Logger log = LoggerFactory.getLogger(MSSQLUtil.class);
 
     public static final Properties properties = new Properties();
     static {
@@ -36,8 +40,17 @@ public class MSSQLUtil extends CLIUtil {
     @NotNull
     public static Connection getConnection(String connectionUrl) throws SQLException {
         Connection con = DriverManager.getConnection(connectionUrl);
-        if (con.prepareStatement("SELECT 1").execute()) System.out.println("Connected to Database CoronaApp as user == " + properties.getProperty("db_user"));
+        if (con.prepareStatement("SELECT 1").execute()) {
+            String dbName = getValueFromConnectionString(connectionUrl, "database");
+            String user = getValueFromConnectionString(connectionUrl, "user");
+            log.info("Connected to database " + dbName + " as '" + user + "'");
+        }
         return con;
+    }
+
+    private static String getValueFromConnectionString(String connectionString, String property) {
+        String[] split = connectionString.split(property+'=');
+        return split[1].split(";")[0];
     }
 
     @Override

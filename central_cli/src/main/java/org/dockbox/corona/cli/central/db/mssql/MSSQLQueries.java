@@ -7,7 +7,15 @@ import java.sql.SQLException;
 public enum MSSQLQueries {
     // User queries
     CHECK_USER_EXISTS_BY_ID("SELECT CASE WHEN EXISTS (SELECT ID FROM [User] WHERE ID = ? ) THEN 'TRUE' ELSE 'FALSE' END AS 'Exists'"),
-    CREATE_USER("INSERT INTO [User] VALUES ( ? )");
+    CREATE_USER("INSERT INTO [User] VALUES ( ? )"),
+
+    // Contact queries
+    GET_ALL_CONTACTS_BY_ID("SELECT ID_user_1 FROM [Contact] WHERE ID_user_2 = ' ? ' UNION SELECT ID_user_2 FROM [Contact] WHERE ID_user_1 = ' ? '"),
+    CREATE_CONTACT("INSERT INTO [Contact] VALUES( ' ? ' , ' ? ' , ' ? '"),
+
+    // Infected queries
+    GET_INFECTED_BY_ID(""),
+    CREATE_INFECTED("");
 
     private final String query;
 
