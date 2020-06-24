@@ -79,8 +79,8 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
             SendUserDataPacket.EMPTY.header == header -> { // Receive from client
                 val sudp = SendUserDataPacket.EMPTY.deserialize(content)!!
 
-                if (userDataQueue.contains(sudp.user.id)) {
-                    util.addUserToDatabase(sudp.user)
+                if (userDataQueue.contains(sudp.userData.id)) {
+                    util.addUserToDatabase(sudp.userData)
                     val confirmPacket = ConfirmPacket(sudp, now)
                     sendPacket(confirmPacket, false, false, session.remote, session.remotePort, false)
 

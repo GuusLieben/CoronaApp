@@ -1,6 +1,6 @@
 package org.dockbox.corona.core.packets;
 
-import org.dockbox.corona.core.model.User;
+import org.dockbox.corona.core.model.UserData;
 import org.dockbox.corona.core.util.Util;
 
 import java.util.Date;
@@ -9,16 +9,16 @@ public class SendUserDataPacket extends Packet {
 
     public static final SendUserDataPacket EMPTY = new SendUserDataPacket(null, null);
 
-    private final User user;
+    private final UserData userData;
     private final Date received;
 
-    public SendUserDataPacket(User user, Date received) {
-        this.user = user;
+    public SendUserDataPacket(UserData userData, Date received) {
+        this.userData = userData;
         this.received = received;
     }
 
     private SendUserDataPacket(Builder builder) {
-        user = builder.user;
+        userData = builder.userData;
         received = builder.received;
     }
 
@@ -30,11 +30,11 @@ public class SendUserDataPacket extends Packet {
     @Override
     public String serialize() {
         return new StringBuilder()
-                .append("ID=").append(user.getId())
-                .append("\nFIRSTNAME=").append(user.getFirstName())
-                .append("\nLASTNAME=").append(user.getLastName())
-                .append("\nBSN=").append(user.getBSN())
-                .append("\nBIRTHDATE=").append(Util.parseDateString(user.getBirthDate()))
+                .append("ID=").append(userData.getId())
+                .append("\nFIRSTNAME=").append(userData.getFirstName())
+                .append("\nLASTNAME=").append(userData.getLastName())
+                .append("\nBSN=").append(userData.getBSN())
+                .append("\nBIRTHDATE=").append(Util.parseDateString(userData.getBirthDate()))
                 .append("\nTIMESTAMP_RECEIVED=").append(Util.parseDateString(received))
                 .toString();
     }
@@ -43,7 +43,7 @@ public class SendUserDataPacket extends Packet {
     public SendUserDataPacket deserialize(String message) {
         String[] lines = message.split("\n");
         Builder builder = new Builder();
-        User.Builder userBuilder = new User.Builder();
+        UserData.Builder userBuilder = new UserData.Builder();
         for (String line : lines) {
             String[] keyValue = line.split("=");
             String key = keyValue[0];
@@ -74,8 +74,8 @@ public class SendUserDataPacket extends Packet {
         return builder.build();
     }
 
-    public User getUser() {
-        return user;
+    public UserData getUserData() {
+        return userData;
     }
 
     public Date getReceived() {
@@ -83,14 +83,14 @@ public class SendUserDataPacket extends Packet {
     }
 
     public static final class Builder {
-        private User user;
+        private UserData userData;
         private Date received;
 
         public Builder() {
         }
 
-        public Builder withUser(User val) {
-            user = val;
+        public Builder withUser(UserData val) {
+            userData = val;
             return this;
         }
 
