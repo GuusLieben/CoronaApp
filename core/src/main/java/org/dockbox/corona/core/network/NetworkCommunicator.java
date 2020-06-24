@@ -38,14 +38,15 @@ public abstract class NetworkCommunicator {
         try {
             byte[] buffer = data.getBytes();
             DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length, remoteHost, remotePort);
-            log.info(String.format("Sending '%s' to remote", data));
+            log.info(String.format("Sending '%s' to remote at '%s:%d'", data, remoteHost.getHostAddress(), remotePort));
             getSocket().send(datagramPacket);
+            log.warn(System.currentTimeMillis() + " Sent");
 
             if (listenForResponse) {
                 byte[] receiveBuffer = new byte[Util.INITIAL_KEY_BLOCK_SIZE];
                 datagramPacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
 
-                log.info("Listening for response from remote");
+                log.info("Listening for response from remote on port " + getSocket().getLocalPort());
                 getSocket().receive(datagramPacket);
                 log.info("Received '" + data + "' from remote");
                 String rawPacket = Util.convertPacketBytes(datagramPacket.getData());
