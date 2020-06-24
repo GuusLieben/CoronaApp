@@ -90,7 +90,7 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                     sendPacket(confirmPacket, false, false, session.remote, session.remotePort, false, session.remotePublicKey, session.sessionKey)
 
                     val requestedBySessions = userDataQueue[sudp.user.id]
-                    requestedBySessions!!.forEach { sendPacket(sudp, false, false, it.remote, it.remotePort, false, session.remotePublicKey, session.sessionKey) }
+                    requestedBySessions!!.forEach { sendPacket(sudp, false, false, it.remote, it.remotePort+1, false, session.remotePublicKey, session.sessionKey) }
                     userDataQueue.remove(sudp.user.id)
                 } else {
                     log.warn("Received unrequested data from " + session.remote.hostAddress)

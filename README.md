@@ -15,6 +15,10 @@
  - moet worden doorgegeven aan de GGD
 5. Secundaire contacten moeten opgevraagd kunnen worden, voor bovenstaande stap 4
 
+## Clients
+Clients are expected to listen on their broadcasting port with a single increment. 
+E.g. if a client broadcasts from port 8181, they are expected to listen for server broadcasts on port 8182
+
 
 ## Eisen 
 1. Persoonsgegevens moeten nooit onderschept kunnen worden
