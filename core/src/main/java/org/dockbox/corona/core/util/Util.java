@@ -33,7 +33,7 @@ public class Util {
 
     private static final Logger log = LoggerFactory.getLogger(Util.class);
 
-    public static final String INVALID = "$InvalidatedContent";
+    public static final String INVALID = "InvalidatedContent";
     public static final String HASH_ALGORITHM = "SHA-512";
     public static final String KEY_ALGORITHM = "RSA";
     public static final String CIPHER_ALGORITHM = "RSA/ECB/PKCS1Padding";
