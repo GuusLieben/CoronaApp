@@ -1,5 +1,6 @@
 package org.dockbox.corona.core.network;
 
+import org.dockbox.corona.core.packets.Packet;
 import org.dockbox.corona.core.packets.key.ExtraPacketHeader;
 import org.dockbox.corona.core.packets.key.PublicKeyExchangePacket;
 import org.dockbox.corona.core.packets.key.SessionKeyExchangePacket;
@@ -65,6 +66,22 @@ public class TCPConnection extends NetworkCommunicator {
         } else throw exceptionSupplier.get();
     }
 
+    public String sendPacket(Packet packet, boolean skipDecrypt, boolean skipEncrypt, boolean listenForResponse) {
+        return super.sendPacket(packet, skipDecrypt, skipEncrypt, getRemoteHost(), getRemotePort(), listenForResponse);
+    }
+
+    public String sendPacket(Packet packet, boolean skipDecrypt, boolean skipEncrypt) {
+        return super.sendPacket(packet, skipDecrypt, skipEncrypt, getRemoteHost(), getRemotePort());
+    }
+
+    public String sendDatagram(String data, boolean skipDecrypt, boolean listenForResponse) {
+        return super.sendDatagram(data, skipDecrypt, getRemoteHost(), getRemotePort(), listenForResponse);
+    }
+
+    public String sendDatagram(String data, boolean skipDecrypt) {
+        return super.sendDatagram(data, skipDecrypt, getRemoteHost(), getRemotePort());
+    }
+
     public void initiateKeyExchange() throws ActivateFailedException {
         log.info("Initiating key exchange with remote");
         PublicKeyExchangePacket pkep = new PublicKeyExchangePacket(publicKey);
@@ -90,6 +107,7 @@ public class TCPConnection extends NetworkCommunicator {
                 SessionKeyOkExchangePacket skoep = SessionKeyOkExchangePacket.EMPTY.deserialize(response);
                 if (skoep == null || !Util.sessionKeyIsValid(skoep.getSessionKey(), getPrivateKey()))
                     throw new ActivateFailedException("Could not activate connection (session key mismatch)");
+                else log.info("Session activated");
             } else throw new ActivateFailedException("Could not activate connection (session key rejected)");
 
         } else throw new ActivateFailedException("Could not activate connection (public key rejected)");
