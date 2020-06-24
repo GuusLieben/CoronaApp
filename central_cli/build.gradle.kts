@@ -4,7 +4,7 @@ plugins {
 }
 
 application {
-    mainClassName = "cli.Main"
+    mainClassName = "org.dockbox.corona.cli.central.CentralCLI"
 }
 
 dependencies {
