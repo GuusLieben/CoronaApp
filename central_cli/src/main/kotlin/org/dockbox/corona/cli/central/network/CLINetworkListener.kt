@@ -39,15 +39,19 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
         val decryptedPacket =
             Util.decryptPacket(rawPacket, session.remotePublicKey, session.sessionKey)
 
-        if (Util.INVALID == decryptedPacket && !Util.isUnmodified(
+        if (Util.INVALID == decryptedPacket || !Util.isUnmodified(
                 Util.getContent(decryptedPacket),
                 Util.getHash(decryptedPacket)
             )
-        ) invalidPacket.run()
+        ) {
+            log.warn("Received modified or corrupted packet")
+            invalidPacket.run()
+        }
 
         val header = Util.getHeader(decryptedPacket)
         val content = Util.getContent(decryptedPacket)
         val now = Date.from(Instant.now())
+
         when {
             SendContactConfPacket.EMPTY.header == header -> { // Receive from client
                 val sccp = SendContactConfPacket.EMPTY.deserialize(content)!!
