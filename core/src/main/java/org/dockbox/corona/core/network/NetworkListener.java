@@ -59,7 +59,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
 
                     } else if (rawPacket.startsWith(SessionKeyExchangePacket.EMPTY.getHeader())) {
                         SessionKeyExchangePacket skep = SessionKeyExchangePacket.EMPTY.deserialize(rawPacket);
-                        if (skep != null && Util.sessionKeyIsValid(skep.getSessionKey(), privateKey) && publicKeyMap.containsKey(remoteLocation)) {
+                        if (skep != null && Util.sessionKeyIsValid(skep.getSessionKey()) && publicKeyMap.containsKey(remoteLocation)) {
                             log.info("Session key OK");
                             SessionKeyOkExchangePacket skoep = new SessionKeyOkExchangePacket(skep.getSessionKey());
                             sessions.put(remoteLocation, new Session(publicKeyMap.get(remoteLocation), skoep.getSessionKey(), packet.getAddress(), packet.getPort()));

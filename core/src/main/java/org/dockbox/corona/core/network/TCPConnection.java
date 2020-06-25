@@ -1,5 +1,6 @@
 package org.dockbox.corona.core.network;
 
+import org.dockbox.corona.core.NetworkCommunicator;
 import org.dockbox.corona.core.packets.Packet;
 import org.dockbox.corona.core.packets.key.ExtraPacketHeader;
 import org.dockbox.corona.core.packets.key.PublicKeyExchangePacket;
@@ -105,7 +106,7 @@ public class TCPConnection extends NetworkCommunicator {
             if (response.startsWith(SessionKeyOkExchangePacket.EMPTY.getHeader())) {
                 log.info("Received session key OK from remote");
                 SessionKeyOkExchangePacket skoep = SessionKeyOkExchangePacket.EMPTY.deserialize(response);
-                if (skoep == null || !Util.sessionKeyIsValid(skoep.getSessionKey(), getPrivateKey()))
+                if (skoep == null || !Util.sessionKeyIsValid(skoep.getSessionKey()))
                     throw new ActivateFailedException("Could not activate connection (session key mismatch)");
                 else log.info("Session activated");
             } else throw new ActivateFailedException("Could not activate connection (session key rejected)");
