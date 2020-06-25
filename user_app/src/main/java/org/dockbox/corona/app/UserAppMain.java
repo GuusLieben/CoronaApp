@@ -86,7 +86,7 @@ public class UserAppMain implements Runnable {
     @Override
     public void run() {
         while (true) {
-            System.out.print(" > ");
+            System.out.print("Enter a command > ");
             String command = scanner.nextLine();
             switch (command.split(" ")[0]) {
                 case "help":
