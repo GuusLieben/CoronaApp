@@ -1,5 +1,6 @@
 package org.dockbox.corona.core.network;
 
+import org.dockbox.corona.core.NetworkCommunicator;
 import org.dockbox.corona.core.packets.key.ExtraPacketHeader;
 import org.dockbox.corona.core.packets.key.PublicKeyExchangePacket;
 import org.dockbox.corona.core.packets.key.SessionKeyExchangePacket;
@@ -72,8 +73,14 @@ public abstract class NetworkListener extends NetworkCommunicator {
 
                 } else {
                     log.info("Encrypted packet, decrypting in session");
-                    // Encrypted
-                    Session session = sessions.get(remoteLocation);
+                    Session session;
+                    if (sessions.containsKey(remoteLocation)) {
+                        // Prepared, encrypted
+                        session = sessions.get(remoteLocation);
+                    } else {
+                        // Not prepared, plain
+                        session = new Session(null, null, packet.getAddress(), packet.getPort());
+                    }
                     new Thread(session.injectPacket(rawPacket)).start();
                 }
             } catch (IOException | RuntimeException e) {
