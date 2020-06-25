@@ -8,7 +8,7 @@ import org.dockbox.corona.core.packets.*
 import org.dockbox.corona.core.packets.key.ExtraPacketHeader
 import org.dockbox.corona.core.util.Util
 import java.net.DatagramSocket
-import java.net.InetAddress
+import java.sql.SQLException
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -25,7 +25,6 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
         private val logins: MutableMap<String, Pair<String, String>> = ConcurrentHashMap();
     }
 
-    private var util: CLIUtil = MSSQLUtil()
     private val socket: DatagramSocket = DatagramSocket(CentralCLI.LISTENER_PORT)
 
     override fun handlePacket(rawPacket: String, session: Session) {
