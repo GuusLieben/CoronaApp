@@ -16,6 +16,11 @@ public class InfectedUser extends UserData {
         this.dateOfInfection = builder.dateOfInfection;
     }
 
+    public InfectedUser(UserData userData, Date timeInfected) {
+        super(userData.getId(), userData.getFirstName(), userData.getLastName(), userData.getBSN(), userData.getBirthDate());
+        this.dateOfInfection = timeInfected;
+    }
+
     public Date getDateOfInfection() {
         return dateOfInfection;
     }
