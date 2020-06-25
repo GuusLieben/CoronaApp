@@ -6,12 +6,18 @@ import java.util.List;
 
 public class SendContactsPacket extends Packet {
 
-    public static final SendContactsPacket EMPTY = new SendContactsPacket(null);
+    public static final SendContactsPacket EMPTY = new SendContactsPacket(null, null);
 
-    public final List<String> contacts;
+    private final String userId;
+    private final List<String> contacts;
 
-    public SendContactsPacket(List<String> contacts) {
+    public SendContactsPacket(String userId, List<String> contacts) {
+        this.userId = userId;
         this.contacts = contacts;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     public List<String> getContacts() {
@@ -28,7 +34,8 @@ public class SendContactsPacket extends Packet {
     public String serialize() {
         StringBuilder sb = new StringBuilder();
         String contactStr = String.join(",", contacts);
-        sb.append("CONTACTS=").append(contactStr);
+        sb.append("CONTACTS=").append(contactStr)
+                .append("ID=").append(userId);
         return sb.toString();
     }
 
@@ -43,6 +50,8 @@ public class SendContactsPacket extends Packet {
             if ("CONTACTS".equals(key)) {
                 String[] contactStr = value.split(",");
                 builder.withContacts(new ArrayList<>(Arrays.asList(contactStr)));
+            } else if ("ID".equals(key)) {
+                builder.withUserId(value);
             } else {
                 throw new IllegalArgumentException("Incorrect packet format");
             }
@@ -53,6 +62,7 @@ public class SendContactsPacket extends Packet {
 
     public static final class Builder {
         public List<String> contacts;
+        public String userId;
 
         private Builder() {
         }
@@ -62,8 +72,13 @@ public class SendContactsPacket extends Packet {
             return this;
         }
 
+        public Builder withUserId(String userId) {
+            this.userId = userId;
+            return this;
+        }
+
         public SendContactsPacket build() {
-            return new SendContactsPacket(contacts);
+            return new SendContactsPacket(userId, contacts);
         }
     }
 }
