@@ -1,3 +1,6 @@
 ﻿.gradle
 .idea
 gradle
+*/build
+*.pub
+cli_config.properties

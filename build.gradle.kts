@@ -1,16 +1,27 @@
 plugins {
     base
     kotlin("jvm") version "1.3.70" apply false
+    java
+    id("com.github.johnrengelman.shadow") version "4.0.4"
 }
 
 allprojects {
 
-    group = "org.dockbox.corona"
 
+    apply(plugin="java")
+    apply(plugin="com.github.johnrengelman.shadow")
+
+    group = "org.dockbox.corona"
     version = "1.0"
 
     repositories {
         jcenter()
+    }
+
+    tasks {
+        build {
+            dependsOn(shadowJar)
+        }
     }
 }
 
