@@ -17,7 +17,9 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 public class MSSQLUtil extends CLIUtil {
@@ -84,14 +86,15 @@ public class MSSQLUtil extends CLIUtil {
     }
 
     @Override
-    public void getAllContactsFromDatabaseById(@NotNull String userId) {
+    public List<String> getAllContactsFromDatabaseById(@NotNull String userId) {
         try {
             log.info("Attempting to get all Contacts from the database for user: " + userId);
-            contactDAO.getAllContactByID(userId);
+            return contactDAO.getAllContactByID(userId);
         } catch (SQLException throwables) {
             log.error(throwables.getMessage());
             throwables.printStackTrace();
         }
+        return new ArrayList<>();
     }
 
     @Override

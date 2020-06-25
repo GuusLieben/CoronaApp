@@ -45,7 +45,7 @@ abstract class CLIUtil {
 
     abstract fun addContactToDatabase(senderId: String, contactId: String, timeOfContact: Date)
 
-    abstract fun getAllContactsFromDatabaseById(userId: String)
+    abstract fun getAllContactsFromDatabaseById(userId: String): List<String>
 
     abstract fun addInfectedToDatabase(userData: UserData, timeInfected: Date)
 
