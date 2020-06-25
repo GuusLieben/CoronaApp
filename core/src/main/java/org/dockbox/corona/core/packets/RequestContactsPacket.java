@@ -34,12 +34,10 @@ public class RequestContactsPacket extends Packet {
             String key = keyValue[0];
             String value = keyValue[1];
 
-            switch (key) {
-                case "ID":
-                    builder.withUserId(value);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Incorrect packet format");
+            if ("ID".equals(key)) {
+                builder.withUserId(value);
+            } else {
+                throw new IllegalArgumentException("Incorrect packet format");
             }
         }
         return builder.build();
