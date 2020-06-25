@@ -3,6 +3,7 @@ package org.dockbox.corona.cli.ggd;
 import org.dockbox.corona.core.network.TCPConnection;
 import org.dockbox.corona.core.packets.ConfirmPacket;
 import org.dockbox.corona.core.packets.LoginPacket;
+import org.dockbox.corona.core.packets.SendAlertPacket;
 import org.dockbox.corona.core.packets.key.ExtraPacketHeader;
 import org.dockbox.corona.core.util.Util;
 
@@ -13,6 +14,9 @@ import java.net.UnknownHostException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.sql.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Scanner;
 
 public class GGDAppMain implements Runnable {
@@ -54,6 +58,7 @@ public class GGDAppMain implements Runnable {
             conn.initiateKeyExchange();
             LoginPacket lp = new LoginPacket(userName, password);
             String res = conn.sendPacket(lp, false, false, true);
+            conn.getSocket().close();
 
             if (ExtraPacketHeader.LOGIN_FAILED.getValue().equals(res)) {
                 System.out.println("Login failed");
@@ -78,11 +83,26 @@ public class GGDAppMain implements Runnable {
                 System.out.println("======================");
                 System.out.println("contacts <id> -> Request all the contacts of the specified id");
                 System.out.println("alert <id> -> Alert an user to request userdata");
+                System.out.println("quit -> exit the program");
                 System.out.println("======================");
                 break;
             case "contacts":
+                System.out.println("- Enter User ID : ");
+                String user = scanner.nextLine();
+
                 break;
             case "alert":
+                System.out.println("- Enter User ID : ");
+                String id = scanner.nextLine();
+                try {
+                    SendAlertPacket sap = new SendAlertPacket(id, Date.from(Instant.now()));
+                    TCPConnection conn = new TCPConnection(privateKey, publicKey, server.getHostAddress(), serverPort, false, APP_PORT);
+                    conn.initiateKeyExchange();
+                    String res = conn.sendPacket(sap, false, false, false);
+                    conn.getSocket().close();
+                } catch (IOException | InstantiationException e) {
+                    e.printStackTrace();
+            }
                 break;
             case "quit":
                 return;

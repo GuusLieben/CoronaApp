@@ -6,16 +6,14 @@ import java.util.Date;
 
 public class SendAlertPacket extends Packet {
 
-    public static final SendAlertPacket EMPTY = new SendAlertPacket(null, null, null);
+    public static final SendAlertPacket EMPTY = new SendAlertPacket(null, null);
 
     private final String id;
     private final Date alerted;
-    private final Date contactInfected;
 
-    public SendAlertPacket(String id, Date alerted, Date contactInfected) {
+    public SendAlertPacket(String id, Date alerted) {
         this.id = id;
         this.alerted = alerted;
-        this.contactInfected = contactInfected;
     }
 
     public String getId() {
@@ -25,11 +23,6 @@ public class SendAlertPacket extends Packet {
     public Date getAlerted() {
         return alerted;
     }
-
-    public Date getContactInfected() {
-        return contactInfected;
-    }
-
 
     @Override
     public String getHeader() {
@@ -41,7 +34,6 @@ public class SendAlertPacket extends Packet {
         return new StringBuilder()
                 .append("ID=").append(this.getId())
                 .append("\nTIMESTAMP_ALERTED=").append(Util.parseDateString(this.getAlerted()))
-                .append("\nCONTACT_TIMESTAMP=").append(Util.parseDateString(this.getContactInfected()))
                 .toString();
     }
 
@@ -61,9 +53,6 @@ public class SendAlertPacket extends Packet {
                 case "TIMESTAMP_ALERTED":
                     builder.withSent(Util.parseDate(value));
                     break;
-                case "CONTACT_TIMESTAMP":
-                    builder.withContactInfected(Util.parseDate(value));
-                    break;
                 default:
                     throw new IllegalArgumentException("Incorrect packet format");
             }
@@ -75,7 +64,6 @@ public class SendAlertPacket extends Packet {
     private static final class Builder {
         private String id;
         private Date alerted;
-        private Date contactInfected;
 
         public SendAlertPacket.Builder withId(String id) {
             this.id = id;
@@ -87,13 +75,8 @@ public class SendAlertPacket extends Packet {
             return this;
         }
 
-        public SendAlertPacket.Builder withContactInfected(Date contactReceived) {
-            this.contactInfected = contactReceived;
-            return this;
-        }
-
         public SendAlertPacket build() {
-            return new SendAlertPacket(id, alerted, contactInfected);
+            return new SendAlertPacket(id, alerted);
         }
     }
 }
