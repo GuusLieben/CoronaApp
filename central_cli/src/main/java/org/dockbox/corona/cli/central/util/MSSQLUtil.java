@@ -84,6 +84,17 @@ public class MSSQLUtil extends CLIUtil {
     }
 
     @Override
+    public void getAllContactsFromDatabaseById(@NotNull String userId) {
+        try {
+            log.info("Attempting to get all Contacts from the database for user: " + userId);
+            contactDAO.getAllContactByID(userId);
+        } catch (SQLException throwables) {
+            log.error(throwables.getMessage());
+            throwables.printStackTrace();
+        }
+    }
+
+    @Override
     public void addInfectedToDatabase(@NotNull UserData userData, @NotNull Date timeInfected) {
         try {
             log.info("Attempting to add a new InfectedUser to the Database: " + userData.toString() + " | " + timeInfected);
