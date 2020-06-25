@@ -56,7 +56,7 @@ public abstract class NetworkCommunicator {
                 String rawPacket = Util.convertPacketBytes(datagramPacket.getData());
                 if (Util.INVALID.equals(rawPacket)) return Util.INVALID;
                 if (skipDecrypt) return rawPacket;
-                else return Util.decryptPacket(rawPacket, foreignPublicKey, getSessionKey());
+                else return Util.decryptPacket(rawPacket, foreignPublicKey, getSessionKey()).replaceAll("\n\n", "\n");
 
             } else return "";
         } catch (IOException e) {
