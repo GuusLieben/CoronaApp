@@ -3,6 +3,7 @@ package org.dockbox.corona.core.packets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SendContactsPacket extends Packet {
 
@@ -21,7 +22,7 @@ public class SendContactsPacket extends Packet {
     }
 
     public List<String> getContacts() {
-        return contacts;
+        return contacts.stream().filter(line -> !"".equals(line)).collect(Collectors.toList());
     }
 
     @Override
@@ -35,7 +36,7 @@ public class SendContactsPacket extends Packet {
         StringBuilder sb = new StringBuilder();
         String contactStr = String.join(",", contacts);
         sb.append("CONTACTS=").append(contactStr)
-                .append("ID=").append(userId);
+                .append("\nID=").append(userId);
         return sb.toString();
     }
 
@@ -44,9 +45,10 @@ public class SendContactsPacket extends Packet {
         String[] lines = message.split("\n");
         SendContactsPacket.Builder builder = new SendContactsPacket.Builder();
         for (String line : lines) {
+            if (!line.contains("=")) continue;
             String[] keyValue = line.split("=");
             String key = keyValue[0];
-            String value = keyValue[1];
+            String value = keyValue.length > 1 ? keyValue[1] : "";
             if ("CONTACTS".equals(key)) {
                 String[] contactStr = value.split(",");
                 builder.withContacts(new ArrayList<>(Arrays.asList(contactStr)));
