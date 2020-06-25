@@ -1,8 +1,12 @@
 package org.dockbox.corona.cli.ggd;
 
+import org.dockbox.corona.core.network.TCPConnection;
+import org.dockbox.corona.core.packets.ConfirmPacket;
+import org.dockbox.corona.core.packets.LoginPacket;
 import org.dockbox.corona.core.util.Util;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.KeyPair;
@@ -29,7 +33,7 @@ public class GGDAppMain implements Runnable {
     private static String userName;
     private static String password;
 
-    public static void main(String[] args) throws UnknownHostException {
+    public static void main(String[] args) throws IOException, InstantiationException {
         server = InetAddress.getByName("127.0.0.1");
 
         System.out.print("Enter port to listen on : ");
@@ -40,6 +44,15 @@ public class GGDAppMain implements Runnable {
 
         System.out.println("- Password : ");
         password = (scanner.nextLine());
+
+        System.out.println(" > Attempting to log in ....");
+
+        TCPConnection conn = new TCPConnection(privateKey, publicKey, server.getHostAddress(), serverPort, false, APP_PORT);
+        conn.initiateKeyExchange();
+        LoginPacket lp = new LoginPacket(userName, password);
+        String res = conn.sendPacket(lp, false, false, true);
+        ConfirmPacket<LoginPacket> clp = new ConfirmPacket<LoginPacket>().deserialize(res, LoginPacket.EMPTY);
+        System.out.println("Confirmed login at " + clp.getConfirmed().toString());
 
         new Thread(GGDAppMain.main).start();
 //        new GGDAppNetworkListener(privateKey).listen();
