@@ -22,6 +22,7 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
         private val userDataQueue: MutableMap<String, MutableList<Session>> = ConcurrentHashMap()
         private val locations: MutableMap<String, Pair<InetAddress, Int>> = ConcurrentHashMap()
         private val queuedInfections: MutableMap<String, Date> = ConcurrentHashMap()
+        private val logins: MutableMap<String, Pair<String, String>> = ConcurrentHashMap();
     }
 
     private var util: CLIUtil = MSSQLUtil()
@@ -127,6 +128,12 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                     )
                 }
             }
+
+            LoginPacket.EMPTY.header == header -> {
+                val lp = LoginPacket.EMPTY.deserialize(content)!!
+
+            }
+
             else -> invalidPacket.run()
         }
     }
