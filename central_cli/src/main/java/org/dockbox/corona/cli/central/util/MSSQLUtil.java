@@ -69,6 +69,9 @@ public class MSSQLUtil extends CLIUtil {
 
     @Override
     public void addContactToDatabase(@NotNull String senderId, @NotNull String contactId, @NotNull Date timeOfContact) {
+        addUserToDatabase(senderId);
+        addUserToDatabase(contactId);
+
         try {
             log.info("Attempting to add a new Contact to the Database: " + senderId + " | " + contactId + " | " + timeOfContact);
             contactDAO.createContact(senderId, contactId, (java.sql.Date) timeOfContact);
