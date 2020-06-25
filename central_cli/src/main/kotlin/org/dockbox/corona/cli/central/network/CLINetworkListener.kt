@@ -121,6 +121,38 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                     sendDatagram(
                         ExtraPacketHeader.FAILED_UNAVAILABLE.value,
                         true,
+            SendAlertPacket.EMPTY.header == header -> {
+                if (loggedIn) {
+                    val login = logins[remoteAddress]!!
+                    val util: CLIUtil = MSSQLUtil(login.first, login.second)
+                    val sap = SendAlertPacket.EMPTY.deserialize(content)!!
+                    if (locations.containsKey(sap.id) && util.verifySession(login.first, login.second)) {
+                        val loc = locations[sap.id]!!
+                        sendPacket(
+                            sap,
+                            false,
+                            false,
+                            loc.remote,
+                            loc.remotePort,
+                            false,
+                            loc.remotePublicKey,
+                            loc.sessionKey
+                        )
+                    } else {
+                        log.warn("Requested alert for user " + sap.id + " but user is not currently active or source is not authorised")
+                        sendDatagram(
+                            ExtraPacketHeader.FAILED_UNAVAILABLE.value,
+                            true,
+                            session.remote,
+                            session.remotePort,
+                            false,
+                            session.remotePublicKey
+                        )
+                    }
+                } else {
+                    sendDatagram(
+                        ExtraPacketHeader.NOT_LOGGED_IN.value,
+                        false,
                         session.remote,
                         session.remotePort,
                         false,
