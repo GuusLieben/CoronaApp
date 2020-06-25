@@ -1,9 +1,12 @@
 package org.dockbox.corona.cli.ggd;
 
+import org.dockbox.corona.cli.ggd.network.GGDAppNetworkListener;
 import org.dockbox.corona.core.network.TCPConnection;
 import org.dockbox.corona.core.packets.*;
 import org.dockbox.corona.core.packets.key.ExtraPacketHeader;
 import org.dockbox.corona.core.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,9 +17,6 @@ import java.security.PublicKey;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.Scanner;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GGDAppMain implements Runnable {
 
@@ -94,7 +94,9 @@ public class GGDAppMain implements Runnable {
                     RequestContactsPacket rcp = new RequestContactsPacket(user);
                     TCPConnection conn = new TCPConnection(privateKey, publicKey, server.getHostAddress(), serverPort, false, APP_PORT);
                     conn.initiateKeyExchange();
+                    conn.getSocket().setSoTimeout(30000);
                     String res = conn.sendPacket(rcp, false, false, true);
+                    conn.getSocket().setSoTimeout(0);
                     if (Util.INVALID.equals(res)) log.error("Received invalid response from server!");
                     else {
                         SendContactsPacket scp = SendContactsPacket.EMPTY.deserialize(res);
