@@ -36,7 +36,7 @@ public class ConfirmPacket<P extends Packet> extends Packet {
 
         packetSer = String.join("\n",
                 Arrays.stream(packetSer.split("\n"))
-                        .filter(line -> !line.startsWith("TIMESTAMP_CONTACT") && line.startsWith("TIMESTAMP"))
+                        .filter(line -> !line.startsWith("TIMESTAMP_CONTACT"))
                         .toArray(String[]::new));
 
         return new StringBuilder()
