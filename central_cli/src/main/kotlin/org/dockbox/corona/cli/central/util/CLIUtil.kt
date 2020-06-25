@@ -39,9 +39,9 @@ abstract class CLIUtil {
 
     abstract fun addContactToDatabase(senderId: String, contactId: String, timeOfContact: Date)
 
-    abstract fun addInfectedToDatabase(senderId: String, timeInfected: Date)
+    abstract fun addInfectedToDatabase(userData: UserData, timeInfected: Date)
 
-    abstract fun addUserToDatabase(userData: UserData)
+    abstract fun addUserToDatabase(senderId: String)
 
     abstract fun verifyRequest(requestPacket: RequestUserDataPacket): Boolean
 }

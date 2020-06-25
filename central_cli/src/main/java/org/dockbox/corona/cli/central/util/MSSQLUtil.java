@@ -1,5 +1,12 @@
 package org.dockbox.corona.cli.central.util;
 
+import org.dockbox.corona.cli.central.db.ContactDAO;
+import org.dockbox.corona.cli.central.db.InfectedDAO;
+import org.dockbox.corona.cli.central.db.UserDAO;
+import org.dockbox.corona.cli.central.db.mssql.ContactDAOImpl;
+import org.dockbox.corona.cli.central.db.mssql.InfectedDAOImpl;
+import org.dockbox.corona.cli.central.db.mssql.UserDAOImpl;
+import org.dockbox.corona.core.model.InfectedUser;
 import org.dockbox.corona.core.model.UserData;
 import org.dockbox.corona.core.packets.RequestUserDataPacket;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +24,9 @@ import java.util.Properties;
 public class MSSQLUtil extends CLIUtil {
 
     public static final Logger log = LoggerFactory.getLogger(MSSQLUtil.class);
+    public static final ContactDAO contactDAO= new ContactDAOImpl();
+    public static final InfectedDAO infectedDAO = new InfectedDAOImpl();
+    public static final UserDAO userDAO = new UserDAOImpl();
 
     public static final Properties properties = new Properties();
     static {
@@ -59,17 +69,38 @@ public class MSSQLUtil extends CLIUtil {
 
     @Override
     public void addContactToDatabase(@NotNull String senderId, @NotNull String contactId, @NotNull Date timeOfContact) {
-
+        try {
+            log.info("Attempting to add a new Contact to the Database: " + senderId + " | " + contactId + " | " + timeOfContact);
+            contactDAO.createContact(senderId, contactId, (java.sql.Date) timeOfContact);
+        } catch (SQLException throwables) {
+            log.error(throwables.getMessage());
+            throwables.printStackTrace();
+        }
+        log.info("Contact added successfully");
     }
 
     @Override
-    public void addInfectedToDatabase(@NotNull String senderId, @NotNull Date timeInfected) {
-
+    public void addInfectedToDatabase(@NotNull UserData userData, @NotNull Date timeInfected) {
+        try {
+            log.info("Attempting to add a new InfectedUser to the Database: " + userData.toString() + " | " + timeInfected);
+            infectedDAO.createInfected(new InfectedUser(userData, timeInfected));
+        } catch (SQLException throwables) {
+            log.error(throwables.getMessage());
+            throwables.printStackTrace();
+        }
+        log.info("InfectedUser added successfully");
     }
 
     @Override
-    public void addUserToDatabase(@NotNull UserData userData) {
-
+    public void addUserToDatabase(@NotNull String senderId) {
+        try {
+            log.info("Attemping to add a new User to the Database: " + senderId);
+            userDAO.createUser(senderId);
+        } catch (SQLException throwables) {
+            log.error(throwables.getMessage());
+            throwables.printStackTrace();
+        }
+        log.info("User added successfully");
     }
 
     @Override
