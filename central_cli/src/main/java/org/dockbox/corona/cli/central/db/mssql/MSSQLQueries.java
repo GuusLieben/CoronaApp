@@ -5,6 +5,8 @@ import org.dockbox.corona.cli.central.util.MSSQLUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public enum MSSQLQueries {
     // Never use NextLines within the queries; It will destroy them.
@@ -39,7 +41,19 @@ public enum MSSQLQueries {
             statement.setObject(i + 1, obj);
         }
         T res = hasResult ? (T) statement.executeQuery() : (T) (Boolean) statement.execute();
-        conn.close();
+        Timer t = new Timer();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    conn.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        };
+
+        t.schedule(task, 2500);
         return res;
     }
 }
