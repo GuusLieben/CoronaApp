@@ -48,7 +48,7 @@ public class GGDAppMain implements Runnable {
             System.out.print("Please enter your Username and Password : \n- Username : ");
             userName = (scanner.nextLine());
 
-            System.out.println("- Password : ");
+            System.out.print("- Password : ");
             password = (scanner.nextLine());
 
             System.out.println(" > Attempting to log in ....");
@@ -63,7 +63,7 @@ public class GGDAppMain implements Runnable {
             if (ExtraPacketHeader.LOGIN_FAILED.getValue().equals(res)) {
                 System.out.println("Login failed");
             } else {
-                ConfirmPacket<LoginPacket> clp = new ConfirmPacket<LoginPacket>().deserialize(res, LoginPacket.EMPTY);
+                ConfirmPacket<LoginPacket> clp = new ConfirmPacket<LoginPacket>().deserialize(Util.getContent(res), LoginPacket.EMPTY);
                 System.out.println("Confirmed login at " + clp.getConfirmed().toString());
                 break;
             }
@@ -72,7 +72,6 @@ public class GGDAppMain implements Runnable {
         new Thread(GGDAppMain.main).start();
         new GGDAppNetworkListener(privateKey).listen();
     }
-
 
     @Override
     public void run() {
@@ -101,7 +100,7 @@ public class GGDAppMain implements Runnable {
                     else {
                         SendContactsPacket scp = SendContactsPacket.EMPTY.deserialize(res);
                         log.info("Contacts of User " + user + " in the last 3 weeks : ");
-                        scp.contacts.forEach(log::info);
+                        scp.getContacts().forEach(log::info);
                     }
                     conn.getSocket().close();
                 } catch (IOException | InstantiationException e) {
