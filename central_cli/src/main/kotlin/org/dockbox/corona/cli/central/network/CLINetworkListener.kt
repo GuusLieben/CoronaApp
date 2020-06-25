@@ -131,7 +131,30 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
 
             LoginPacket.EMPTY.header == header -> {
                 val lp = LoginPacket.EMPTY.deserialize(content)!!
-
+                val util = MSSQLUtil(lp.userName, lp.password)
+                try {
+                    util.openConnection().close()
+                    logins[remoteAddress] = Pair(lp.userName, lp.password)
+                    sendPacket(
+                        ConfirmPacket<LoginPacket>(lp, Date.from(Instant.now())),
+                        false,
+                        false,
+                        session.remote,
+                        session.remotePort,
+                        false,
+                        session.remotePublicKey,
+                        session.sessionKey
+                    )
+                } catch (exception: SQLException) {
+                    sendDatagram(
+                        ExtraPacketHeader.LOGIN_FAILED.value,
+                        false,
+                        session.remote,
+                        session.remotePort,
+                        false,
+                        session.remotePublicKey
+                    )
+                }
             }
 
             else -> invalidPacket.run()
