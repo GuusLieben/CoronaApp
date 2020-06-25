@@ -207,6 +207,15 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                             loc.remotePublicKey,
                             loc.sessionKey
                         )
+                        sendPacket(
+                            ConfirmPacket(sap, Date.from(Instant.now())),
+                            false,
+                            false,
+                            session.remote,
+                            session.remotePort,
+                            false,
+                            session.remotePublicKey, session.sessionKey
+                        )
                     } else {
                         log.warn("Requested alert for user " + sap.id + " but user is not currently active or source is not authorised")
                         sendDatagram(
@@ -218,6 +227,36 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                             session.remotePublicKey
                         )
                     }
+                } else {
+                    sendDatagram(
+                        ExtraPacketHeader.NOT_LOGGED_IN.value,
+                        false,
+                        session.remote,
+                        session.remotePort,
+                        false,
+                        session.remotePublicKey
+                    )
+                }
+            }
+
+            RequestContactsPacket.EMPTY.header == header -> {
+                if (loggedIn) {
+                    val login = logins[remoteAddress]!!
+                    val util: CLIUtil = MSSQLUtil(login.first, login.second)
+                    val rcp = RequestContactsPacket.EMPTY.deserialize(content)!!
+                    // Request from util with rcp.getUserId()
+                    val sccp = SendContactsPacket(rcp.getUserId(), ArrayList())
+                    sendPacket(
+                        sccp,
+                        false,
+                        false,
+                        session.remote,
+                        session.remotePort,
+                        false,
+                        session.remotePublicKey,
+                        session.sessionKey
+                    )
+
                 } else {
                     sendDatagram(
                         ExtraPacketHeader.NOT_LOGGED_IN.value,
