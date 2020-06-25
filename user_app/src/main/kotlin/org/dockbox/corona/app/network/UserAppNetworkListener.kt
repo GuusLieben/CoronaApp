@@ -38,7 +38,7 @@ class UserAppNetworkListener(privateKey: PrivateKey?) : NetworkListener(privateK
             val conn = TCPConnection(UserAppMain.getPrivateKey(), UserAppMain.getPublicKey(), UserAppMain.server.hostAddress, UserAppMain.serverPort, false, UserAppMain.APP_PORT)
             conn.initiateKeyExchange()
             val res = conn.sendPacket(sccp, false, false, true)
-            log.warn(res)
+            log.info(Util.getHeader(res))
             conn.socket.close()
             return
         }

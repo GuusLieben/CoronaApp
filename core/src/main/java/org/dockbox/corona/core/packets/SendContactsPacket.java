@@ -30,7 +30,6 @@ public class SendContactsPacket extends Packet {
         return "SEND::CONTACTS";
     }
 
-
     @Override
     public String serialize() {
         StringBuilder sb = new StringBuilder();

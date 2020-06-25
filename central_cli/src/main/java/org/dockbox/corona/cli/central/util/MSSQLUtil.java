@@ -78,7 +78,7 @@ public class MSSQLUtil extends CLIUtil {
 
         try {
             log.info("Attempting to add a new Contact to the Database: " + senderId + " | " + contactId + " | " + timeOfContact);
-            log.error("Succeeded : " + contactDAO.createContact(senderId, contactId, new java.sql.Date(timeOfContact.getTime())));
+            contactDAO.createContact(senderId, contactId, new java.sql.Date(timeOfContact.getTime()));
         } catch (SQLException throwables) {
             log.error(throwables.getMessage());
             throwables.printStackTrace();
