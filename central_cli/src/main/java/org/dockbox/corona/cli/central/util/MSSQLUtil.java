@@ -56,6 +56,7 @@ public class MSSQLUtil extends CLIUtil {
 
     @NotNull
     public Connection openConnection(String connectionUrl) throws SQLException {
+        log.error(connectionUrl);
         Connection con = DriverManager.getConnection(connectionUrl);
         if (con.prepareStatement("SELECT 1").execute()) {
             String dbName = getValueFromConnectionString(connectionUrl, "database");
@@ -77,7 +78,7 @@ public class MSSQLUtil extends CLIUtil {
 
         try {
             log.info("Attempting to add a new Contact to the Database: " + senderId + " | " + contactId + " | " + timeOfContact);
-            contactDAO.createContact(senderId, contactId, (java.sql.Date) timeOfContact);
+            log.error("Succeeded : " + contactDAO.createContact(senderId, contactId, new java.sql.Date(timeOfContact.getTime())));
         } catch (SQLException throwables) {
             log.error(throwables.getMessage());
             throwables.printStackTrace();

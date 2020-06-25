@@ -60,7 +60,7 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
         when {
             SendContactConfPacket.EMPTY.header == header -> { // Receive from client
                 val util: CLIUtil =
-                    MSSQLUtil(MSSQLUtil.properties.getProperty("db_user"), MSSQLUtil.properties.getProperty("db_pass"))
+                    MSSQLUtil(MSSQLUtil.properties.getProperty("db_user"), MSSQLUtil.properties.getProperty("db_password"))
                 val sccp = SendContactConfPacket.EMPTY.deserialize(content)!!
 
                 val confirmDiff: Long = abs(sccp.contactReceived.time - sccp.contactSent.time)
@@ -102,7 +102,7 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
 
             SendUserDataPacket.EMPTY.header == header -> { // Receive from client
                 val util: CLIUtil =
-                    MSSQLUtil(MSSQLUtil.properties.getProperty("db_user"), MSSQLUtil.properties.getProperty("db_pass"))
+                    MSSQLUtil(MSSQLUtil.properties.getProperty("db_user"), MSSQLUtil.properties.getProperty("db_password"))
                 val sudp = SendUserDataPacket.EMPTY.deserialize(content)!!
 
                 if (userDataQueue.contains(sudp.userData.id) && queuedInfections.containsKey(sudp.userData.id)) {

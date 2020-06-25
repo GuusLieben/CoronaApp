@@ -14,7 +14,7 @@ public enum MSSQLQueries {
 
     // Contact queries
     GET_ALL_CONTACTS_BY_ID("SELECT ID_user_1 AS 'Contacts' FROM [Contact] WHERE ID_user_2 = ? UNION SELECT ID_user_2 FROM [Contact] WHERE ID_user_1 = ? "),
-    CREATE_CONTACT("INSERT INTO [Contact] VALUES( ? , ? , ? );  SELECT FROM [Contact] WHERE ID_user_1 = ?  AND ID_user_2 = ? " ),
+    CREATE_CONTACT("INSERT INTO [Contact] VALUES( ? , ? , ? ); SELECT ID_user_1, ID_user_2, Date_of_Contact FROM [Contact] WHERE ID_user_1 = ?  AND ID_user_2 = ? " ),
 
     // Infected queries
     GET_INFECTED_BY_ID("SELECT ID, BSN, First_Name, Last_Name, Date_of_Birth, Date_of_Infection FROM [Infected] WHERE ID = ? "),
