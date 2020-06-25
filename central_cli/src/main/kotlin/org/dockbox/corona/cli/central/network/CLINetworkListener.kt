@@ -20,7 +20,7 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
     companion object {
         // IDs, requested by Sessions
         private val userDataQueue: MutableMap<String, MutableList<Session>> = ConcurrentHashMap()
-        private val locations: MutableMap<String, Pair<InetAddress, Int>> = ConcurrentHashMap()
+        private val locations: MutableMap<String, Session> = ConcurrentHashMap()
         private val queuedInfections: MutableMap<String, Date> = ConcurrentHashMap()
         private val logins: MutableMap<String, Pair<String, String>> = ConcurrentHashMap();
     }
@@ -61,14 +61,27 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
 
                 val confirmDiff: Long = abs(sccp.contactReceived.time - sccp.contactSent.time)
                 val diff = TimeUnit.SECONDS.convert(confirmDiff, TimeUnit.MILLISECONDS)
-                if (confirmDiff > 60000) log.warn("Contact confirmation took " + (diff/1000) + "s!")
+                if (confirmDiff > 60000) log.warn("Contact confirmation took " + (diff / 1000) + "s!")
 
-                if (util.addAndVerify(sccp.id, sccp.contactId)) util.addContactToDatabase(sccp.id, sccp.contactId, sccp.contactReceived)
+                if (util.addAndVerify(sccp.id, sccp.contactId)) util.addContactToDatabase(
+                    sccp.id,
+                    sccp.contactId,
+                    sccp.contactReceived
+                )
                 val confirmPacket = ConfirmPacket(sccp, Date.from(Instant.now()))
-                sendPacket(confirmPacket, false, false, session.remote, session.remotePort, false, session.remotePublicKey, session.sessionKey)
+                sendPacket(
+                    confirmPacket,
+                    false,
+                    false,
+                    session.remote,
+                    session.remotePort,
+                    false,
+                    session.remotePublicKey,
+                    session.sessionKey
+                )
 
                 // Server needs to be able to alert a user
-                locations[sccp.id] = Pair(session.remote, session.remotePort)
+                locations[sccp.id] = session
             }
 
             SendInfectConfPacket.EMPTY.header == header -> { // Receive from client
