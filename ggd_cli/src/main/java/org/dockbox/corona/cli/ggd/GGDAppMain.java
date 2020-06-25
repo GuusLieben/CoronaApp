@@ -70,7 +70,7 @@ public class GGDAppMain implements Runnable {
         }
 
         new Thread(GGDAppMain.main).start();
-//        new GGDAppNetworkListener(privateKey).listen();
+        new GGDAppNetworkListener(privateKey).listen();
     }
 
 
