@@ -26,13 +26,13 @@ public enum MSSQLQueries {
         this.query = query;
     }
 
-    public <T> T prepare(Object... args) throws SQLException {
-        return prepareWithRes(true, args);
+    public <T> T prepare(MSSQLUtil instance, Object... args) throws SQLException {
+        return prepareWithRes(instance, true, args);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T prepareWithRes(boolean hasResult, Object... args) throws SQLException {
-        Connection conn = MSSQLUtil.openConnection(MSSQLUtil.MSSQL_CONNECTION_STRING);
+    public <T> T prepareWithRes(MSSQLUtil instance, boolean hasResult, Object... args) throws SQLException {
+        Connection conn = instance.openConnection();
         PreparedStatement statement = conn.prepareStatement(this.query);
         for (int i = 0; i < args.length; i++) {
             Object obj = args[i];

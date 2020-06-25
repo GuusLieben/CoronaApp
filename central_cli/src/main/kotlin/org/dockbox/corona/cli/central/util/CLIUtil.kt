@@ -1,7 +1,6 @@
 package org.dockbox.corona.cli.central.util
 
 import org.dockbox.corona.core.model.UserData
-import org.dockbox.corona.core.packets.RequestUserDataPacket
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -50,5 +49,5 @@ abstract class CLIUtil {
 
     abstract fun addUserToDatabase(senderId: String)
 
-    abstract fun verifyRequest(requestPacket: RequestUserDataPacket): Boolean
+    abstract fun verifySession(userName: String, password: String): Boolean
 }

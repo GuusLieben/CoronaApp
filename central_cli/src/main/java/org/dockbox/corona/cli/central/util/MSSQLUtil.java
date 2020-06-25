@@ -8,7 +8,6 @@ import org.dockbox.corona.cli.central.db.mssql.InfectedDAOImpl;
 import org.dockbox.corona.cli.central.db.mssql.UserDAOImpl;
 import org.dockbox.corona.core.model.InfectedUser;
 import org.dockbox.corona.core.model.UserData;
-import org.dockbox.corona.core.packets.RequestUserDataPacket;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +23,21 @@ import java.util.Properties;
 public class MSSQLUtil extends CLIUtil {
 
     public static final Logger log = LoggerFactory.getLogger(MSSQLUtil.class);
-    public static final ContactDAO contactDAO= new ContactDAOImpl();
-    public static final InfectedDAO infectedDAO = new InfectedDAOImpl();
-    public static final UserDAO userDAO = new UserDAOImpl();
+
+    public final ContactDAO contactDAO= new ContactDAOImpl(this);
+    public final InfectedDAO infectedDAO = new InfectedDAOImpl(this);
+    public final UserDAO userDAO = new UserDAOImpl(this);
+
+    private final String mssqlConnectionString;
+
+    public MSSQLUtil(String user, String password) {
+        this.mssqlConnectionString = "jdbc:sqlserver://"
+                + properties.getProperty("db_host")
+                + "\\SQLEXPRESS:" + properties.getProperty("db_port")
+                + ";user=" + user
+                + ";password=" + password
+                + ";database=" + properties.getProperty("db_name");
+    }
 
     public static final Properties properties = new Properties();
     static {
@@ -36,15 +47,13 @@ public class MSSQLUtil extends CLIUtil {
             ioException.printStackTrace();
         }
     }
-    public static final String MSSQL_CONNECTION_STRING = "jdbc:sqlserver://"
-            + properties.getProperty("db_host")
-            + "\\SQLEXPRESS:" + properties.getProperty("db_port")
-            + ";user=" + properties.getProperty("db_user")
-            + ";password=" + properties.getProperty("db_password")
-            + ";database=" + properties.getProperty("db_name");
+
+    public Connection openConnection() throws SQLException {
+        return openConnection(this.mssqlConnectionString);
+    }
 
     @NotNull
-    public static Connection openConnection(String connectionUrl) throws SQLException {
+    public Connection openConnection(String connectionUrl) throws SQLException {
         Connection con = DriverManager.getConnection(connectionUrl);
         if (con.prepareStatement("SELECT 1").execute()) {
             String dbName = getValueFromConnectionString(connectionUrl, "database");
@@ -52,14 +61,6 @@ public class MSSQLUtil extends CLIUtil {
             log.info("Connected to database " + dbName + " as '" + user + "'");
         }
         return con;
-    }
-
-    public static void closeConnection(Connection con) {
-        try {
-            con.close();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
     }
 
     private static String getValueFromConnectionString(String connectionString, String property) {
@@ -104,7 +105,18 @@ public class MSSQLUtil extends CLIUtil {
     }
 
     @Override
-    public boolean verifyRequest(@NotNull RequestUserDataPacket requestPacket) {
+    public boolean verifySession(@NotNull String userName, @NotNull String password) {
+        if (
+                userName.equals(getValueFromConnectionString(this.mssqlConnectionString, "user"))
+                && password.equals(getValueFromConnectionString(this.mssqlConnectionString, "password"))
+        ) {
+            try {
+                openConnection().close();
+                return true;
+            } catch (SQLException e) {
+                return false;
+            }
+        }
         return false;
     }
 }

@@ -4,6 +4,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class LoginPacket extends Packet {
 
+    public static final LoginPacket EMPTY = new LoginPacket(null, null);
+
     private final String userName;
     private final String password;
 
@@ -34,7 +36,7 @@ public class LoginPacket extends Packet {
     }
 
     @Override
-    public Packet deserialize(String message) {
+    public LoginPacket deserialize(String message) {
         String[] lines = message.split("\n");
         LoginPacket.Builder builder = new LoginPacket.Builder();
         for (String line : lines) {
