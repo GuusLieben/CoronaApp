@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 public class LoginPacket extends Packet {
 
     public static final LoginPacket EMPTY = new LoginPacket(null, null);
+
     private final String userName;
     private final String password;
 

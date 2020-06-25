@@ -21,6 +21,8 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
         // IDs, requested by Sessions
         private val userDataQueue: MutableMap<String, MutableList<Session>> = ConcurrentHashMap()
         private val locations: MutableMap<String, Pair<InetAddress, Int>> = ConcurrentHashMap()
+        private val queuedInfections: MutableMap<String, Date> = ConcurrentHashMap()
+        private val logins: MutableMap<String, Pair<String, String>> = ConcurrentHashMap();
     }
 
     private var util: CLIUtil = MSSQLUtil()
@@ -64,6 +66,9 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                 if (util.addAndVerify(sccp.id, sccp.contactId)) util.addContactToDatabase(sccp.id, sccp.contactId, sccp.contactReceived)
                 val confirmPacket = ConfirmPacket(sccp, Date.from(Instant.now()))
                 sendPacket(confirmPacket, false, false, session.remote, session.remotePort, false, session.remotePublicKey, session.sessionKey)
+
+                // Server needs to be able to alert a user
+                locations[sccp.id] = Pair(session.remote, session.remotePort)
             }
 
             SendInfectConfPacket.EMPTY.header == header -> { // Receive from client
@@ -73,19 +78,17 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                 val diff = TimeUnit.SECONDS.convert(receiveDiff, TimeUnit.MILLISECONDS)
                 if (diff > 30000) log.warn("Packet took " + (diff / 1000) + "s to arrive!")
 
-                util.addInfectedToDatabase(sicp.id, sicp.infected)
+                queuedInfections[sicp.id] = sicp.infected
                 val confirmPacket = ConfirmPacket(sicp, now)
                 sendPacket(confirmPacket, false, false, session.remote, session.remotePort, false, session.remotePublicKey, session.sessionKey)
-
-                // Do not keep track of their location until a infection is indicated
-                locations[sicp.id] = Pair(session.remote, session.remotePort)
             }
 
             SendUserDataPacket.EMPTY.header == header -> { // Receive from client
                 val sudp = SendUserDataPacket.EMPTY.deserialize(content)!!
 
-                if (userDataQueue.contains(sudp.userData.id)) {
-                    util.addUserToDatabase(sudp.userData)
+                if (userDataQueue.contains(sudp.userData.id) && queuedInfections.containsKey(sudp.userData.id)) {
+
+                    util.addInfectedToDatabase(sudp.userData, queuedInfections[sudp.userData.id]!!)
                     val confirmPacket = ConfirmPacket(sudp, now)
                     sendPacket(confirmPacket, false, false, session.remote, session.remotePort, false, session.remotePublicKey, session.sessionKey)
 
@@ -125,6 +128,12 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                     )
                 }
             }
+
+            LoginPacket.EMPTY.header == header -> {
+                val lp = LoginPacket.EMPTY.deserialize(content)!!
+
+            }
+
             else -> invalidPacket.run()
         }
     }
