@@ -55,8 +55,13 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
         val content = Util.getContent(decryptedPacket)
         val now = Date.from(Instant.now())
 
+        val remoteAddress = session.remote.hostAddress + ':' + session.remotePort
+        val loggedIn = logins.containsKey(remoteAddress)
+
         when {
             SendContactConfPacket.EMPTY.header == header -> { // Receive from client
+                val util: CLIUtil =
+                    MSSQLUtil(MSSQLUtil.properties.getProperty("db_user"), MSSQLUtil.properties.getProperty("db_pass"))
                 val sccp = SendContactConfPacket.EMPTY.deserialize(content)!!
 
                 val confirmDiff: Long = abs(sccp.contactReceived.time - sccp.contactSent.time)
