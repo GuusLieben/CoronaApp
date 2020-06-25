@@ -244,10 +244,9 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                     val login = logins[remoteAddress]!!
                     val util: CLIUtil = MSSQLUtil(login.first, login.second)
                     val rcp = RequestContactsPacket.EMPTY.deserialize(content)!!
-                    // Request from util with rcp.getUserId()
-                    val sccp = SendContactsPacket(rcp.getUserId(), ArrayList())
+                    val scp = SendContactsPacket(rcp.getUserId(), util.getAllContactsFromDatabaseById(rcp.getUserId()))
                     sendPacket(
-                        sccp,
+                        scp,
                         false,
                         false,
                         session.remote,
