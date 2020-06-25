@@ -36,7 +36,7 @@ public class LoginPacket extends Packet {
     }
 
     @Override
-    public Packet deserialize(String message) {
+    public LoginPacket deserialize(String message) {
         String[] lines = message.split("\n");
         LoginPacket.Builder builder = new LoginPacket.Builder();
         for (String line : lines) {

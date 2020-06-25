@@ -3,6 +3,9 @@ package org.dockbox.corona.core.packets;
 import org.jetbrains.annotations.Nullable;
 
 public class RequestContactsPacket extends Packet {
+
+    public static final RequestContactsPacket EMPTY = new RequestContactsPacket(null);
+
     public final String userId;
 
     public RequestContactsPacket(String userId) {
@@ -26,7 +29,7 @@ public class RequestContactsPacket extends Packet {
     }
 
     @Override
-    public Packet deserialize(@Nullable String message) {
+    public RequestContactsPacket deserialize(@Nullable String message) {
         String[] lines = message.split("\n");
         RequestContactsPacket.Builder builder = new RequestContactsPacket.Builder();
         for (String line : lines) {

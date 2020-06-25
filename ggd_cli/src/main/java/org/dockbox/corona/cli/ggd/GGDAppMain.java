@@ -1,23 +1,22 @@
 package org.dockbox.corona.cli.ggd;
 
 import org.dockbox.corona.core.network.TCPConnection;
-import org.dockbox.corona.core.packets.ConfirmPacket;
-import org.dockbox.corona.core.packets.LoginPacket;
-import org.dockbox.corona.core.packets.SendAlertPacket;
+import org.dockbox.corona.core.packets.*;
 import org.dockbox.corona.core.packets.key.ExtraPacketHeader;
 import org.dockbox.corona.core.util.Util;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.sql.Date;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Scanner;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GGDAppMain implements Runnable {
 
@@ -33,6 +32,7 @@ public class GGDAppMain implements Runnable {
     public static final PublicKey serverPublic = Util.getPublicKeyFromFile(new File("central_cli.pub")).get();
     public static int APP_PORT;
 
+    private static final Logger log = LoggerFactory.getLogger(GGDAppMain.class);
     private static final Scanner scanner = new Scanner(System.in);
 
     private static String userName;
@@ -89,22 +89,48 @@ public class GGDAppMain implements Runnable {
             case "contacts":
                 System.out.println("- Enter User ID : ");
                 String user = scanner.nextLine();
-
+                System.out.println(" > Attempting to retrieve contacts .... ");
+                try {
+                    RequestContactsPacket rcp = new RequestContactsPacket(user);
+                    TCPConnection conn = new TCPConnection(privateKey, publicKey, server.getHostAddress(), serverPort, false, APP_PORT);
+                    conn.initiateKeyExchange();
+                    String res = conn.sendPacket(rcp, false, false, true);
+                    if (Util.INVALID.equals(res)) log.error("Received invalid response from server!");
+                    else {
+                        SendContactsPacket scp = SendContactsPacket.EMPTY.deserialize(res);
+                        log.info("Contacts of User " + user + " in the last 3 weeks : ");
+                        scp.contacts.forEach(log::info);
+                    }
+                    conn.getSocket().close();
+                } catch (IOException | InstantiationException e) {
+                    e.printStackTrace();
+                    log.error(" Command failed : " + e.getMessage());
+                }
                 break;
             case "alert":
                 System.out.println("- Enter User ID : ");
                 String id = scanner.nextLine();
+                System.out.println(" > Attempting to alert user .... ");
                 try {
                     SendAlertPacket sap = new SendAlertPacket(id, Date.from(Instant.now()));
                     TCPConnection conn = new TCPConnection(privateKey, publicKey, server.getHostAddress(), serverPort, false, APP_PORT);
                     conn.initiateKeyExchange();
                     String res = conn.sendPacket(sap, false, false, false);
+                    if (Util.INVALID.equals(res)) log.error("Received invalid response from server!");
+                    else {
+                        ConfirmPacket<? extends Packet> confirmPacket = new ConfirmPacket<>().deserialize(res, SendAlertPacket.EMPTY);
+                        java.util.Date confirmed = confirmPacket.getConfirmed();
+                        log.info("Confirmed at " + confirmed.toString());
+                    }
                     conn.getSocket().close();
                 } catch (IOException | InstantiationException e) {
                     e.printStackTrace();
-            }
+                    log.error(" Command failed : " + e.getMessage());
+                }
+                log.info("\n > Command handled successfully\n");
                 break;
             case "quit":
+                System.out.println(" > Goodbye :)");
                 return;
         }
     }

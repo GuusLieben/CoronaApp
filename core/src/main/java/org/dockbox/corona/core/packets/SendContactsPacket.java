@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SendContactsPacket extends Packet {
+
+    public static final SendContactsPacket EMPTY = new SendContactsPacket(null);
+
     public final List<String> contacts;
 
     public SendContactsPacket(List<String> contacts) {
@@ -30,7 +33,7 @@ public class SendContactsPacket extends Packet {
     }
 
     @Override
-    public Packet deserialize(String message) {
+    public SendContactsPacket deserialize(String message) {
         String[] lines = message.split("\n");
         SendContactsPacket.Builder builder = new SendContactsPacket.Builder();
         for (String line : lines) {
