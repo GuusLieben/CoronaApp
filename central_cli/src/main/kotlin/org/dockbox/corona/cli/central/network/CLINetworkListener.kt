@@ -84,16 +84,38 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
             }
 
             SendUserDataPacket.EMPTY.header == header -> { // Receive from client
+                val util: CLIUtil =
+                    MSSQLUtil(MSSQLUtil.properties.getProperty("db_user"), MSSQLUtil.properties.getProperty("db_pass"))
                 val sudp = SendUserDataPacket.EMPTY.deserialize(content)!!
 
                 if (userDataQueue.contains(sudp.userData.id) && queuedInfections.containsKey(sudp.userData.id)) {
 
                     util.addInfectedToDatabase(sudp.userData, queuedInfections[sudp.userData.id]!!)
                     val confirmPacket = ConfirmPacket(sudp, now)
-                    sendPacket(confirmPacket, false, false, session.remote, session.remotePort, false, session.remotePublicKey, session.sessionKey)
+                    sendPacket(
+                        confirmPacket,
+                        false,
+                        false,
+                        session.remote,
+                        session.remotePort,
+                        false,
+                        session.remotePublicKey,
+                        session.sessionKey
+                    )
 
                     val requestedBySessions = userDataQueue[sudp.userData.id]
-                    requestedBySessions!!.forEach { sendPacket(sudp, false, false, it.remote, it.remotePort+1, false, session.remotePublicKey, session.sessionKey) }
+                    requestedBySessions!!.forEach {
+                        sendPacket(
+                            sudp,
+                            false,
+                            false,
+                            it.remote,
+                            it.remotePort + 1,
+                            false,
+                            session.remotePublicKey,
+                            session.sessionKey
+                        )
+                    }
                     userDataQueue.remove(sudp.userData.id)
 
                 } else {
@@ -110,17 +132,47 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
             }
 
             RequestUserDataPacket.EMPTY.header == header -> { // Forward from GGD
-                val rudp = RequestUserDataPacket.EMPTY.deserialize(content)!!
-                // Clients will only accept this request if they have indicated they are infected. When they indicate
-                // a infection their IP and port are stored. Otherwise this information is not available.
-                if (locations.containsKey(rudp.id) && util.verifyRequest(rudp)) {
-                    val loc = locations[rudp.id]!!
-                    sendPacket(rudp, false, false, loc.first, loc.second, false, session.remotePublicKey, session.sessionKey)
+                if (loggedIn) {
+                    val login = logins[remoteAddress]!!
+                    val util: CLIUtil = MSSQLUtil(login.first, login.second)
+                    val rudp = RequestUserDataPacket.EMPTY.deserialize(content)!!
+                    // Clients will only accept this request if they have indicated they are infected. When they indicate
+                    // a infection their IP and port are stored. Otherwise this information is not available.
+                    if (locations.containsKey(rudp.id) && util.verifySession(login.first, login.second)) {
+                        val loc = locations[rudp.id]!!
+                        sendPacket(
+                            rudp,
+                            false,
+                            false,
+                            loc.remote,
+                            loc.remotePort,
+                            false,
+                            loc.remotePublicKey,
+                            loc.sessionKey
+                        )
+                    } else {
+                        log.warn("Requested data for user " + rudp.id + " but user is not currently active or source is not authorised")
+                        sendDatagram(
+                            ExtraPacketHeader.FAILED_UNAVAILABLE.value,
+                            true,
+                            session.remote,
+                            session.remotePort,
+                            false,
+                            session.remotePublicKey
+                        )
+                    }
                 } else {
-                    log.warn("Requested data for user " + rudp.id + " but user is not currently active or did not indicate to be infected")
                     sendDatagram(
-                        ExtraPacketHeader.FAILED_UNAVAILABLE.value,
-                        true,
+                        ExtraPacketHeader.NOT_LOGGED_IN.value,
+                        false,
+                        session.remote,
+                        session.remotePort,
+                        false,
+                        session.remotePublicKey
+                    )
+                }
+            }
+
             SendAlertPacket.EMPTY.header == header -> {
                 if (loggedIn) {
                     val login = logins[remoteAddress]!!
