@@ -146,7 +146,6 @@ public class Util {
             decrypt.init(Cipher.DECRYPT_MODE, key);
             return toString(decrypt.doFinal(encrypted));
         } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException e) {
-            e.printStackTrace();
             return Util.INVALID;
         }
     }
@@ -195,16 +194,16 @@ public class Util {
         return generateSessionKey(aesKey);
     }
 
-    public static byte[] decryptSessionKey(SecretKey sessionKey, PrivateKey privateKey) {
+    public static byte[] decryptSessionKey(SecretKey sessionKey) {
         log.info("Decrypting session key with '" + SESSION_CIPHER_ALGORITHM + "' (type:PrivateKey)");
         byte[] signedAesKey = sessionKey.getEncoded();
         return toByteArray(decrypt(signedAesKey, sessionKey, SESSION_CIPHER_ALGORITHM));
     }
 
-    public static boolean sessionKeyIsValid(SecretKey sessionKey, PrivateKey privateKey) {
-        byte[] secret = decryptSessionKey(sessionKey, privateKey);
+    public static boolean sessionKeyIsValid(SecretKey sessionKey) {
+        byte[] secret = decryptSessionKey(sessionKey);
         return generateSessionKey(secret)
-                .map(secretKey -> decryptSessionKey(secretKey, privateKey))
+                .map(Util::decryptSessionKey)
                 .filter(secretClone -> Arrays.equals(secret, secretClone))
                 .isPresent();
     }

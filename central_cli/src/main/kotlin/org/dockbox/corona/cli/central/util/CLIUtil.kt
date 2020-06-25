@@ -2,11 +2,15 @@ package org.dockbox.corona.cli.central.util
 
 import org.dockbox.corona.core.model.UserData
 import org.dockbox.corona.core.packets.RequestUserDataPacket
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.ArrayList
 
 abstract class CLIUtil {
+
+    private val log: Logger = LoggerFactory.getLogger(CLIUtil::class.java)
 
     companion object {
         private val contactQueue: MutableMap<String, MutableList<String>> = ConcurrentHashMap();
@@ -27,12 +31,15 @@ abstract class CLIUtil {
             val ids = contactQueue[contactId];
             if (ids!!.contains(senderId)) {
                 ids.remove(senderId)
+                log.info("Verified contact between $senderId and $contactId")
                 return true
             }
         }
 
         if (!contactQueue.containsKey(senderId)) contactQueue[senderId] = ArrayList()
         contactQueue[senderId]!!.add(contactId)
+
+        log.info("Queued verification for contact between $senderId and $contactId")
 
         return false;
     }

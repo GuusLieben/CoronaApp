@@ -21,12 +21,12 @@ public class JMain {
                 SecretKey clientSession = Util.generateSessionKey().get();
                 // Performed by server, sent to client
                 PrivateKey serverPrivate = serverKeyPair.getPrivate();
-                byte[] guessedClientSecret = Util.decryptSessionKey(clientSession, serverPrivate);
+                byte[] guessedClientSecret = Util.decryptSessionKey(clientSession);
                 System.out.println("Guessed client : " + Arrays.toString(guessedClientSecret));
                 SecretKey serverSession = Util.generateSessionKey(guessedClientSecret).get();
                 // Performed by client
                 PrivateKey clientPrivate = clientKeyPair.getPrivate();
-                byte[] guessedServerSecret = Util.decryptSessionKey(serverSession, clientPrivate);
+                byte[] guessedServerSecret = Util.decryptSessionKey(serverSession);
 
                 System.out.println("Session key validation status : " + Arrays.equals(guessedClientSecret, guessedServerSecret));
 

@@ -105,7 +105,7 @@ public class TCPConnection extends NetworkCommunicator {
             if (response.startsWith(SessionKeyOkExchangePacket.EMPTY.getHeader())) {
                 log.info("Received session key OK from remote");
                 SessionKeyOkExchangePacket skoep = SessionKeyOkExchangePacket.EMPTY.deserialize(response);
-                if (skoep == null || !Util.sessionKeyIsValid(skoep.getSessionKey(), getPrivateKey()))
+                if (skoep == null || !Util.sessionKeyIsValid(skoep.getSessionKey()))
                     throw new ActivateFailedException("Could not activate connection (session key mismatch)");
                 else log.info("Session activated");
             } else throw new ActivateFailedException("Could not activate connection (session key rejected)");

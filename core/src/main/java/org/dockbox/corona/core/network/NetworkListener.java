@@ -59,7 +59,7 @@ public abstract class NetworkListener extends NetworkCommunicator {
 
                     } else if (rawPacket.startsWith(SessionKeyExchangePacket.EMPTY.getHeader())) {
                         SessionKeyExchangePacket skep = SessionKeyExchangePacket.EMPTY.deserialize(rawPacket);
-                        if (skep != null && Util.sessionKeyIsValid(skep.getSessionKey(), privateKey) && publicKeyMap.containsKey(remoteLocation)) {
+                        if (skep != null && Util.sessionKeyIsValid(skep.getSessionKey()) && publicKeyMap.containsKey(remoteLocation)) {
                             log.info("Session key OK");
                             SessionKeyOkExchangePacket skoep = new SessionKeyOkExchangePacket(skep.getSessionKey());
                             sessions.put(remoteLocation, new Session(publicKeyMap.get(remoteLocation), skoep.getSessionKey(), packet.getAddress(), packet.getPort()));
@@ -72,8 +72,14 @@ public abstract class NetworkListener extends NetworkCommunicator {
 
                 } else {
                     log.info("Encrypted packet, decrypting in session");
-                    // Encrypted
-                    Session session = sessions.get(remoteLocation);
+                    Session session;
+                    if (sessions.containsKey(remoteLocation)) {
+                        // Prepared, encrypted
+                        session = sessions.get(remoteLocation);
+                    } else {
+                        // Not prepared, plain
+                        session = new Session(null, null, packet.getAddress(), packet.getPort());
+                    }
                     new Thread(session.injectPacket(rawPacket)).start();
                 }
             } catch (IOException | RuntimeException e) {

@@ -34,11 +34,13 @@ class UserAppNetworkListener(privateKey: PrivateKey?) : NetworkListener(privateK
 
         if (rawPacket.startsWith(ExtraPacketHeader.CONTACT_PREFIX.value)) {
             val contactId = rawPacket.replaceFirst(ExtraPacketHeader.CONTACT_PREFIX.value, "")
-            val sccp = SendContactConfPacket(UserAppMain.main.id, contactId, Date.from(Instant.now()), Date.from(Instant.now()))
+            val sccp = SendContactConfPacket(UserAppMain.main.user.id, contactId, Date.from(Instant.now()), Date.from(Instant.now()))
             val conn = TCPConnection(UserAppMain.getPrivateKey(), UserAppMain.getPublicKey(), UserAppMain.server.hostAddress, UserAppMain.serverPort, false, UserAppMain.APP_PORT)
             conn.initiateKeyExchange()
-            conn.sendPacket(sccp, false, false, false)
+            val res = conn.sendPacket(sccp, false, false, true)
+            log.warn(res)
             conn.socket.close()
+            return
         }
 
         val decryptedPacket =
@@ -60,11 +62,11 @@ class UserAppNetworkListener(privateKey: PrivateKey?) : NetworkListener(privateK
         when {
             SendAlertPacket.EMPTY.header == header -> { // Receive from server
                 val sap = SendAlertPacket.EMPTY.deserialize(content)!!
-                if (sap.id == UserAppMain.main.id) log.error("You have been in contact with a person with Corona, and have therefore been instructed to stay at home!")
+                if (sap.id == UserAppMain.main.user.id) log.error("You have been in contact with a person with Corona, and have therefore been instructed to stay at home!")
             }
             RequestUserDataPacket.EMPTY.header == header -> {
                 val rudp = RequestUserDataPacket.EMPTY.deserialize(content)!!
-                if (rudp.id == UserAppMain.main.id) {
+                if (rudp.id == UserAppMain.main.user.id) {
                     val receiveDiff: Long = abs(now.time - rudp.timestamp.time)
                     var diff = TimeUnit.SECONDS.convert(receiveDiff, TimeUnit.MILLISECONDS)
                     if (diff > 30000) log.warn("Packet took " + (diff / 1000) + "s to arrive!")
