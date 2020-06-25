@@ -105,7 +105,18 @@ public class MSSQLUtil extends CLIUtil {
     }
 
     @Override
-    public boolean verifyRequest(@NotNull RequestUserDataPacket requestPacket) {
+    public boolean verifySession(@NotNull String userName, @NotNull String password) {
+        if (
+                userName.equals(getValueFromConnectionString(this.mssqlConnectionString, "user"))
+                && password.equals(getValueFromConnectionString(this.mssqlConnectionString, "password"))
+        ) {
+            try {
+                openConnection().close();
+                return true;
+            } catch (SQLException e) {
+                return false;
+            }
+        }
         return false;
     }
 }
