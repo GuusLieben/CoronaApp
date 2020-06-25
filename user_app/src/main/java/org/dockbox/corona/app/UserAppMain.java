@@ -94,6 +94,7 @@ public class UserAppMain implements Runnable {
                     System.out.println("infect -> Notify the server you have been infected");
                     System.out.println("secret -> Display a secret");
                     System.out.println("contact <id> -> Send a contact request to another user");
+                    System.out.println("quit -> exit the program");
                     System.out.println("======================");
                     break;
                 case "secret":

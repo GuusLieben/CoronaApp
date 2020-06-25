@@ -3,6 +3,7 @@ package org.dockbox.corona.cli.ggd;
 import org.dockbox.corona.core.network.TCPConnection;
 import org.dockbox.corona.core.packets.ConfirmPacket;
 import org.dockbox.corona.core.packets.LoginPacket;
+import org.dockbox.corona.core.packets.key.ExtraPacketHeader;
 import org.dockbox.corona.core.util.Util;
 
 import java.io.File;
@@ -39,20 +40,29 @@ public class GGDAppMain implements Runnable {
         System.out.print("Enter port to listen on : ");
         APP_PORT = Integer.parseInt(scanner.nextLine());
 
-        System.out.print("Please enter your Username and Password : \n- Username : ");
-        userName = (scanner.nextLine());
+        while (true) {
+            System.out.print("Please enter your Username and Password : \n- Username : ");
+            userName = (scanner.nextLine());
 
-        System.out.println("- Password : ");
-        password = (scanner.nextLine());
+            System.out.println("- Password : ");
+            password = (scanner.nextLine());
 
-        System.out.println(" > Attempting to log in ....");
+            System.out.println(" > Attempting to log in ....");
 
-        TCPConnection conn = new TCPConnection(privateKey, publicKey, server.getHostAddress(), serverPort, false, APP_PORT);
-        conn.initiateKeyExchange();
-        LoginPacket lp = new LoginPacket(userName, password);
-        String res = conn.sendPacket(lp, false, false, true);
-        ConfirmPacket<LoginPacket> clp = new ConfirmPacket<LoginPacket>().deserialize(res, LoginPacket.EMPTY);
-        System.out.println("Confirmed login at " + clp.getConfirmed().toString());
+            // Verify the login credentials
+            TCPConnection conn = new TCPConnection(privateKey, publicKey, server.getHostAddress(), serverPort, false, APP_PORT);
+            conn.initiateKeyExchange();
+            LoginPacket lp = new LoginPacket(userName, password);
+            String res = conn.sendPacket(lp, false, false, true);
+
+            if (ExtraPacketHeader.LOGIN_FAILED.getValue().equals(res)) {
+                System.out.println("Login failed");
+            } else {
+                ConfirmPacket<LoginPacket> clp = new ConfirmPacket<LoginPacket>().deserialize(res, LoginPacket.EMPTY);
+                System.out.println("Confirmed login at " + clp.getConfirmed().toString());
+                break;
+            }
+        }
 
         new Thread(GGDAppMain.main).start();
 //        new GGDAppNetworkListener(privateKey).listen();
@@ -64,7 +74,18 @@ public class GGDAppMain implements Runnable {
         System.out.println("Enter a command > ");
         String command = scanner.nextLine();
         switch (command.split(" ")[0]) {
-
+            case "help":
+                System.out.println("======================");
+                System.out.println("contacts <id> -> Request all the contacts of the specified id");
+                System.out.println("alert <id> -> Alert an user to request userdata");
+                System.out.println("======================");
+                break;
+            case "contacts":
+                break;
+            case "alert":
+                break;
+            case "quit":
+                return;
         }
     }
 }
