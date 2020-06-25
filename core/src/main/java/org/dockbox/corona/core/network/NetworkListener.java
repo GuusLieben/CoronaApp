@@ -1,6 +1,5 @@
 package org.dockbox.corona.core.network;
 
-import org.dockbox.corona.core.NetworkCommunicator;
 import org.dockbox.corona.core.packets.key.ExtraPacketHeader;
 import org.dockbox.corona.core.packets.key.PublicKeyExchangePacket;
 import org.dockbox.corona.core.packets.key.SessionKeyExchangePacket;
