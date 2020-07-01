@@ -167,11 +167,21 @@ class CLINetworkListener : NetworkListener(CentralCLI.CENTRAL_CLI_PRIVATE) {
                             loc.remotePublicKey,
                             loc.sessionKey
                         )
+                        val crudp = ConfirmPacket(rudp, Date.from(Instant.now()))
+                        sendPacket(
+                            crudp,
+                            false,
+                            false,
+                            session.remote,
+                            session.remotePort,
+                            false,
+                            session.remotePublicKey
+                        )
                     } else {
                         log.warn("Requested data for user " + rudp.id + " but user is not currently active or source is not authorised")
                         sendDatagram(
                             ExtraPacketHeader.FAILED_UNAVAILABLE.value,
-                            true,
+                            false,
                             session.remote,
                             session.remotePort,
                             false,

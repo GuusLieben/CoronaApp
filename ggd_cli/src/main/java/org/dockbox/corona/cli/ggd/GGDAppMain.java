@@ -83,12 +83,12 @@ public class GGDAppMain implements Runnable {
                     System.out.println("======================");
                     System.out.println("contacts <id> -> Request all the contacts of the specified id");
                     System.out.println("alert <id> -> Alert an user to request userdata");
+                    System.out.println("request <id> -> Requests user data for the specified id");
                     System.out.println("quit -> exit the program");
                     System.out.println("======================");
                     break;
                 case "contacts":
-                    System.out.print("- Enter User ID : ");
-                    String user = scanner.nextLine();
+                    String user = command.split(" ")[1];
                     System.out.println(" > Attempting to retrieve contacts .... ");
                     try {
                         RequestContactsPacket rcp = new RequestContactsPacket(user);
@@ -110,8 +110,7 @@ public class GGDAppMain implements Runnable {
                     }
                     break;
                 case "alert":
-                    System.out.print("- Enter User ID : ");
-                    String id = scanner.nextLine();
+                    String id = command.split(" ")[1];
                     System.out.println(" > Attempting to alert user .... ");
                     try {
                         SendAlertPacket sap = new SendAlertPacket(id, Date.from(Instant.now()));
@@ -131,6 +130,28 @@ public class GGDAppMain implements Runnable {
                     }
                     log.info("\n > Command handled successfully\n");
                     break;
+                case "request":
+                    String userId = command.split(" ")[1];
+                    System.out.println(" > Requesting user data");
+                    try {
+                        RequestUserDataPacket rudp = new RequestUserDataPacket(userId, Date.from(Instant.now()));
+                        TCPConnection conn = new TCPConnection(privateKey, publicKey, server.getHostAddress(), serverPort, false, APP_PORT);
+                        conn.initiateKeyExchange();
+                        String res = conn.sendPacket(rudp, false, false, true);
+                        if (Util.INVALID.equals(res)) log.error("Received invalid response from server!");
+                        else if (ExtraPacketHeader.NOT_LOGGED_IN.getValue().equals(res)) {
+                            log.error("Failed to request data; not logged in! (Did the key exchange fail?)");
+                        } else if (ExtraPacketHeader.FAILED_UNAVAILABLE.getValue().equals(res)) {
+                            log.error("Failed to request data; client is unavailable");
+                        } else {
+                            ConfirmPacket<? extends Packet> crudp = new ConfirmPacket<>().deserialize(res, RequestUserDataPacket.EMPTY);
+                            log.info("Confirmed at " + crudp.getConfirmed().toString());
+                        }
+                    } catch (IOException | InstantiationException e) {
+                        e.printStackTrace();
+                        log.error(" Command failed : " + e.getMessage());
+                    }
+
                 case "quit":
                     System.out.println(" > Goodbye :)");
                     return;
